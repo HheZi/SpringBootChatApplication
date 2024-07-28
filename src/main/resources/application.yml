@@ -1,0 +1,9 @@
+spring:
+  application.name: Spring_Boot_Chat_Application
+  datasource:
+    url: jdbc:postgresql://localhost:5432/Bookstore
+    password: postgres
+    username: postgres
+logging:
+  level:
+    web: debug
