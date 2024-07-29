@@ -13,7 +13,7 @@ public class UserMapper {
 				.email(dto.getEmail())
 				.username(dto.getUsername())
 				.password(dto.getPassword())
-				.avatar(dto.getAvatar().getOriginalFilename())
+				.avatar(dto.getAvatar() == null ? "" : dto.getAvatar().getOriginalFilename())
 				.build();
 	}
 	

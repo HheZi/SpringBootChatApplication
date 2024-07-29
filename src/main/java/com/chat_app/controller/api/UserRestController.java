@@ -29,7 +29,7 @@ public class UserRestController {
 		if (rs.hasErrors()) {
 			throw new ErrorAPIException(HttpStatus.NOT_ACCEPTABLE, rs.getFieldError().getDefaultMessage(), Instant.now());
 		}
-//		userService.saveUser(dto);
+		userService.saveUser(dto);
 		
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}

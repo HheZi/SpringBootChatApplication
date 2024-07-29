@@ -39,7 +39,8 @@ public class User implements UserDetails{
 	private String password;
 	
 	@Column("is_non_locked")
-	private Boolean isNonLocked;
+	@Builder.Default
+	private Boolean isNonLocked = true;
 
 	private String avatar;
 	

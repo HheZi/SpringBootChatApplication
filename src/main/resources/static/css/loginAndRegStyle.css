@@ -28,3 +28,17 @@ body {
 .btn-primary:hover {
 	background-color: #a584b3;
 }
+
+.alert {
+	position: fixed;
+	top: 0;
+	left: 0;
+	margin: 10px;
+	z-index: 1050;
+	transform: translateX(-150%);
+	transition: transform 1.0s ease-in-out;
+}
+
+.alert.show {
+	transform: translateX(0);
+}

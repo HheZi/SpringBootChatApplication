@@ -1,7 +1,7 @@
 spring:
   application.name: Spring_Boot_Chat_Application
   datasource:
-    url: jdbc:postgresql://localhost:5432/Bookstore
+    url: jdbc:postgresql://localhost:5432/ChatApplication
     password: postgres
     username: postgres
 logging:
