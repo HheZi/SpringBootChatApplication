@@ -8,7 +8,7 @@
     <link href="/css/loginAndRegStyle.css" rel="stylesheet">
 </head>
 <body>
-    <div th:replace="fragments::alerts"></div>
+    <div th:replace="~{fragments::alerts}"></div>
     <div class="card p-4">
         <div class="card-body">
             <h3 class="card-title text-center mb-4">Register</h3>
@@ -17,13 +17,14 @@
 	            th:name="${_csrf.parameterName}"
 	            th:value="${_csrf.token}"/>
                 <label for="username">Username</label>
-                <input type="text" class="form-control form-group" id="username" name="username">
+                <input type="text" class="form-control form-group" id="username" name="username" required>
 
                 <label for="email">Email address</label>
-                <input type="email" class="form-control form-group" id="email" name="email">
+                <input type="email" class="form-control form-group" id="email" name="email" required>
 
                 <label for="password">Password</label>
-                <input type="password" class="form-control form-group" id="password" name="password">
+                <input type="password" class="form-control form-group" id="password" name="password" required>
+                
                 <button type="submit" class="btn btn-primary btn-block">Register</button>
                 <div class="text-center mt-3">
                     <a href="/login" class="link-primary">Already have an account?</a>
@@ -31,7 +32,6 @@
             </form>
         </div>
     </div>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script type="text/javascript" src="/js/registration.js"></script>
 </body>
 </html>

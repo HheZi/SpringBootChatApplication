@@ -8,6 +8,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.chat_app.mapper.UserMapper;
+import com.chat_app.model.User;
+import com.chat_app.model.enums.Status;
 import com.chat_app.model.projection.UserWriteDTO;
 import com.chat_app.repository.UserReposiory;
 
@@ -33,6 +35,16 @@ public class UserService implements UserDetailsService{
 		dto.setPassword(passwordEncoder.encode(dto.getPassword()));
 		
 		userReposiory.save(userMapper.dtoToUser(dto));
+	}
+
+	public void makeUserOnline(User user) {
+		user.setStatus(Status.ONLINE);
+		userReposiory.save(user);
+	}
+
+	public void makeUserOffline(User user) {
+		user.setStatus(Status.OFFLINE);
+		
 	}
 	
 	
