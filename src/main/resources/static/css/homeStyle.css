@@ -91,3 +91,8 @@ body {
 	align-self: flex-end;
 	background-color: #7f5a8e;
 }
+
+
+.search-dropdown .dropdown-item:hover {
+	background-color: #6d4a7e;
+}

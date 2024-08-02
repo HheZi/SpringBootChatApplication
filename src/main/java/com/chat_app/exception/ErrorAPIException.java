@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-public class ResponseAPIException extends RuntimeException{
+public class ErrorAPIException extends RuntimeException{
 
 	private static final long serialVersionUID = 648060121129122216L;
 
@@ -18,7 +18,7 @@ public class ResponseAPIException extends RuntimeException{
 	
 	private Instant timestamp;
 
-	public ResponseAPIException(HttpStatusCode httpStatus, String message) {
+	public ErrorAPIException(HttpStatusCode httpStatus, String message) {
 		this.httpStatus = httpStatus;
 		this.message = message;
 		this.timestamp = Instant.now();

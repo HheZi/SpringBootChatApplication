@@ -10,8 +10,8 @@ import org.springframework.web.server.ResponseStatusException;
 @RestControllerAdvice
 public class ErrorAPIExceptionHandler {
 
-	@ExceptionHandler(ResponseAPIException.class)
-	public ResponseEntity<ErrorAPIResponse> exception(ResponseAPIException ex){
+	@ExceptionHandler(ErrorAPIException.class)
+	public ResponseEntity<ErrorAPIResponse> exception(ErrorAPIException ex){
 		return new ResponseEntity<ErrorAPIResponse>(new ErrorAPIResponse(ex.getHttpStatus().value(), ex.getMessage(), ex.getTimestamp()), 
 				ex.getHttpStatus());
 	}

@@ -16,7 +16,7 @@ public class Group {
 	public String id;
 	
 	public String senderName;
-	
+		
 	public String recipientName;
 	
 }

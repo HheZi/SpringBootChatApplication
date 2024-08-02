@@ -6,11 +6,19 @@
     <title>Chat Application</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/homeStyle.css" rel="stylesheet">
+    <link href="/css/alertStyle.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 </head>
 <body>
     <div class="container-fluid">
+    	<div th:replace="~{fragments::alerts}"></div>
         <div class="row h-100">
             <div class="col-3 sidebar">
+            	<div class="mb-3">
+                    <input type="text" class="form-control" id="search-input" placeholder="Search users">
+                    <div class="search-dropdown" id="search-dropdown">
+                    </div>
+                </div>
                 <h4>Groups</h4>
             </div>
             <div class="col-9 chat">
@@ -30,5 +38,6 @@
             </div>
         </div>
     </div>
+    <script type="text/javascript" src="/js/home.js"></script>
 </body>
 </html>
