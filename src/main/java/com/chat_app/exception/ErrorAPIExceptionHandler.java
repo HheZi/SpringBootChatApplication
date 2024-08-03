@@ -12,8 +12,8 @@ public class ErrorAPIExceptionHandler {
 
 	@ExceptionHandler(ErrorAPIException.class)
 	public ResponseEntity<ErrorAPIResponse> exception(ErrorAPIException ex){
-		return new ResponseEntity<ErrorAPIResponse>(new ErrorAPIResponse(ex.getHttpStatus().value(), ex.getMessage(), ex.getTimestamp()), 
-				ex.getHttpStatus());
+		return new ResponseEntity<ErrorAPIResponse>(new ErrorAPIResponse(ex.getHttpStatus().value(), ex.getMessage(), 
+					ex.getHttpStatus().getReasonPhrase(), ex.getTimestamp()), ex.getHttpStatus());
 	}
 	
 }

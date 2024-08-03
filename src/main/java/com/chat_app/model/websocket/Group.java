@@ -1,5 +1,10 @@
 package com.chat_app.model.websocket;
 
+import java.util.List;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,12 +16,13 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
+@Document
 public class Group {
 	
-	public String id;
+	@Id
+	private String id;
 	
-	public String senderName;
-		
-	public String recipientName;
+	private String groupName;
 	
+	private List<String> usersName;
 }

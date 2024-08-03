@@ -19,6 +19,8 @@ public class ErrorAPIResponse {
 	
 	private String message;
 	
+	private String error;
+	
 	@JsonFormat(shape = Shape.STRING)
 	private Instant timestamp;
 		
