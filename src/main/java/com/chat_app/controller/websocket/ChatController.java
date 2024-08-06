@@ -21,6 +21,7 @@ import com.chat_app.service.ChatService;
 
 @Controller
 public class ChatController {
+	
 	@Autowired
 	private ChatService service;
 	
@@ -31,5 +32,7 @@ public class ChatController {
 		}
 		service.createGroup(group);
 	}
+	
+	
 	
 }
