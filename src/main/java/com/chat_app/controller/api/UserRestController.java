@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,6 +47,11 @@ public class UserRestController {
 //		userService.makeUserOffline(user);
 //		return user;
 //	}
+	
+	@GetMapping("/auth")
+	public String getAuthUsername(@AuthenticationPrincipal UserDetails userDetails) {
+		return userDetails.getUsername();
+	}
 	
 	@GetMapping
 	public List<UserReadDTO> UsersByUsername(@RequestParam(name = "username", defaultValue = "") String username) {

@@ -15,9 +15,6 @@
         <div class="card-body">
             <h3 class="card-title text-center mb-4">Register</h3>
             <form id="form">
-	            <input type="hidden"
-	            th:name="${_csrf.parameterName}"
-	            th:value="${_csrf.token}"/>
                 <label for="username">Username</label>
                 <input type="text" class="form-control form-group" id="username" name="username" required>
 

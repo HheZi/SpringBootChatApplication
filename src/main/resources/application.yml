@@ -7,3 +7,4 @@ spring:
 logging:
   level:
     web: debug
+server.error.include-stacktrace: never

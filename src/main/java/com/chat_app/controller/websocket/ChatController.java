@@ -1,5 +1,7 @@
 package com.chat_app.controller.websocket;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -13,9 +15,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.chat_app.exception.ErrorAPIException;
 import com.chat_app.model.User;
+import com.chat_app.model.projection.GroupReadDTO;
 import com.chat_app.model.projection.GroupWriteDTO;
 import com.chat_app.service.ChatService;
 
@@ -24,6 +29,12 @@ public class ChatController {
 	
 	@Autowired
 	private ChatService service;
+
+	@GetMapping("/chat")
+	@ResponseBody
+	public List<GroupReadDTO> getAllGroups(@RequestParam(name = "username") String username){
+		return service.getAllByUsername(username);
+	}
 	
 	@PostMapping("/chat")
 	public void createGroup(@ModelAttribute @Validated GroupWriteDTO group, BindingResult result) {
@@ -32,7 +43,6 @@ public class ChatController {
 		}
 		service.createGroup(group);
 	}
-	
 	
 	
 }
