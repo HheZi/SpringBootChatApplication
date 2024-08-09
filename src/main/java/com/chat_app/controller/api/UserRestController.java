@@ -3,11 +3,13 @@ package com.chat_app.controller.api;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
@@ -54,7 +56,10 @@ public class UserRestController {
 	}
 	
 	@GetMapping
-	public List<UserReadDTO> UsersByUsername(@RequestParam(name = "username", defaultValue = "") String username) {
+	@PreAuthorize("#userService.isUsernameIsTheSameAsAuth(username)")
+	public List<UserReadDTO> UsersByUsername(
+			@RequestParam(name = "username") @Param("username") String username
+			) {
 		return userService.getUsersByUsername(username);
 	}
 	

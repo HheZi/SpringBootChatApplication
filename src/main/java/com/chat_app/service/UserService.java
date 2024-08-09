@@ -3,6 +3,7 @@ package com.chat_app.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -58,5 +59,7 @@ public class UserService implements UserDetailsService{
 		userReposiory.save(user);
 	}
 	
-	
+	public boolean isUsernameIsTheSameAsAuth(String username) {
+		return SecurityContextHolder.getContext().getAuthentication().getName().equals(username);	
+	}
 }

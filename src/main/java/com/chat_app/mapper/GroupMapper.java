@@ -11,7 +11,7 @@ import com.chat_app.model.websocket.Group;
 @Component
 public class GroupMapper {
 
-	private String socketUrlPattern = "/user/%s/queue/messages";
+	private final String socketUrlPattern = "/user/%s/queue/messages";
 	
 	public Group writeDtoToGroup(GroupWriteDTO dto) {
 		return Group.builder()
