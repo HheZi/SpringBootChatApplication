@@ -17,7 +17,7 @@ import lombok.Setter;
 @Setter
 @Document
 @EqualsAndHashCode
-public class ChatMessage {
+public class Message {
 	
 	@Id
 	private String id;
@@ -25,6 +25,8 @@ public class ChatMessage {
 	private String message;
 
 	private String sender;
+	
+	private String groupName;
 	
 	private Instant timestamp;
 	

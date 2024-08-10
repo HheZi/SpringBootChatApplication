@@ -1,5 +1,9 @@
 spring:
   application.name: Spring_Boot_Chat_Application
+  data:
+    mongodb:
+      database: chatApplication
+      uri: mongodb://localhost:27017/
   datasource:
     url: jdbc:postgresql://localhost:5432/ChatApplication
     password: postgres

@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.chat_app.mapper.UserMapper;
 import com.chat_app.model.User;
@@ -30,11 +31,13 @@ public class UserService implements UserDetailsService{
 	private UserReposiory userReposiory;
 	
 	@Override
+	@Transactional(readOnly = true)	
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		return userReposiory.findByUsername(username)
 				.orElseThrow((() -> new UsernameNotFoundException("User is not found")));
 	}
 
+	@Transactional(readOnly = true)	
 	public List<UserReadDTO> getUsersByUsername(String username){
 		return userReposiory
 				.findByUsernameIsStartingWithIgnoreCase(username)
@@ -42,7 +45,8 @@ public class UserService implements UserDetailsService{
 				.map(userMapper::userToReadDTO)
 				.toList();
 	}
-			
+	
+	@Transactional
 	public void saveUser(UserWriteDTO dto) {
 		dto.setPassword(passwordEncoder.encode(dto.getPassword()));
 		

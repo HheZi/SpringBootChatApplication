@@ -56,10 +56,7 @@ public class UserRestController {
 	}
 	
 	@GetMapping
-	@PreAuthorize("#userService.isUsernameIsTheSameAsAuth(username)")
-	public List<UserReadDTO> UsersByUsername(
-			@RequestParam(name = "username") @Param("username") String username
-			) {
+	public List<UserReadDTO> UsersByUsername(@RequestParam(name = "username") String username) {
 		return userService.getUsersByUsername(username);
 	}
 	

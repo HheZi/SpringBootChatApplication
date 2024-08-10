@@ -12,9 +12,4 @@ import com.mongodb.client.MongoClients;
 @EnableMongoRepositories("com.chat_app.repository")
 public class MongoDBConfig {
 
-	@Bean
-	MongoTemplate mongoTemplate() {
-		return new MongoTemplate(new SimpleMongoClientDatabaseFactory(MongoClients.create(), "chatApplication"));
-	}
-	
 }
