@@ -11,12 +11,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.chat_app.mapper.UserMapper;
 import com.chat_app.model.User;
 import com.chat_app.model.enums.Status;
 import com.chat_app.model.projection.UserReadDTO;
 import com.chat_app.model.projection.UserWriteDTO;
 import com.chat_app.repository.UserReposiory;
+import com.chat_app.service.mapper.UserMapper;
 
 @Service
 public class UserService implements UserDetailsService{

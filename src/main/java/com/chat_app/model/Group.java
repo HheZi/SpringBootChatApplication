@@ -1,4 +1,4 @@
-package com.chat_app.model.websocket;
+package com.chat_app.model;
 
 import java.util.List;
 

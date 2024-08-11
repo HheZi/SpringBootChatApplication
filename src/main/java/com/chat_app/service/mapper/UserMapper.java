@@ -1,12 +1,13 @@
-package com.chat_app.mapper;
+package com.chat_app.service.mapper;
 
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.chat_app.model.User;
 import com.chat_app.model.projection.UserReadDTO;
 import com.chat_app.model.projection.UserWriteDTO;
 
-@Component
+@Service
 public class UserMapper {
 
 	public User writeDTOToUser(UserWriteDTO dto) {

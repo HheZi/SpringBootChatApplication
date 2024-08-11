@@ -8,7 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.chat_app.model.websocket.Group;
+import com.chat_app.model.Group;
 
 @Repository
 public interface GroupRepository extends MongoRepository<Group, String>{

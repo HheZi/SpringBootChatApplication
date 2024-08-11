@@ -1,11 +1,16 @@
 let stompClient;
 let username;
+let currentGroupSocketUrl;
+let currentGroupName;
 
 document.addEventListener("DOMContentLoaded", connect)
 
-function onMessageReceived(message){
-
+function onMessageReceived(resp){
+	const message = JSON.parse(resp.body);
+	addMessage(message);
 }
+
+
 
 
 function connect(){
@@ -15,14 +20,14 @@ function connect(){
 
 function onConnected(){
 	$.get("/api/users/auth")
-	.done(async (resp) => {
+	.done((resp) => {
 		username = resp;
 		
 		
 		$.get(`/chat?username=${resp}`)
 	    .then((data) => {
 			data.forEach((group) => {
-		        const row = `<div class="group-item" onclick="getChat('${group.groupName}')">
+		        const row = `<div class="group-item" onclick="getChat('${group.groupName}', '${group.groupSocketUrl}')">
 		                   <img src="https://via.placeholder.com/40" alt="Group Icon">
 		                   <div class="group-details">
 		                       <div class="group-name">${group.groupName}</div>
@@ -30,40 +35,58 @@ function onConnected(){
 		                   </div>
 		               </div>`;
 				$("#group-container").append(row);			
+	    	stompClient.subscribe(group.groupSocketUrl, onMessageReceived);
 			})
-	    	stompClient.connect(data.groupSocketUrl, onMessageReceived);
 	    })
 	})
 	
 }
 
-function getChat(groupName){
+function addMessage(message){
+	let tagPos = (username === message.sender) ? "float-right" : "float-left";
+	const row = `<div class="message ${tagPos}">
+                  <div class="message-content">
+                   <span class="sender-name">${message.sender}</span>
+                        <p>${message.content}</p>
+                        <span class="timestamp">${message.timestamp}</span>
+                 </div>
+              </div>`;
+	$(".chat-body").append(row);
+}
+
+
+function getChat(groupName, groupSocketUrl){
 	$(".chat-body").text("");
+	$("#sendBut").prop('disabled', false);
+	[currentGroupSocketUrl, currentGroupName] = [groupSocketUrl, groupName];
 	$("#chatName").text(groupName);
+
 	$.get(`chat/messages?groupName=${groupName}`)
 	.done((data) =>{
-		data.forEach((mes) => {
-			let tagPos;
-			if(username === mes.sender){
-				tagPos = "float-right";
-			}
-			else{
-				tagPos = "float-left";
-			}
-			const row = `<div class="message ${tagPos}">
-                        <div class="message-content">
-                            <span class="sender-name">${mes.sender}</span>
-                            <p>${mes.message}</p>
-                            <span class="timestamp">${mes.timestamp}</span>
-                        </div>
-                    </div>`;
-			$(".chat-body").append(row);
-			
+		data.forEach((message) => {
+			addMessage(message)
 		})
 	});
 }
 
+$("#sendBut").on("click", (e) => {
+    if($("sendInput").val())
+    	return;
+    const message = {
+		content: $("#sendInput").val(),
+		sender: username,
+		groupName: currentGroupName
+	}
+	stompClient.send("/app" + currentGroupSocketUrl, {}, JSON.stringify(message))
+	$("sendInput").val("");
+});
+
 $("#search-input").on("input", function(){
+			if($(this).val()){
+				$("#search-dropdown").val("");
+				return;
+			}
+						
             $.get(`/api/users?username=${$(this).val()}`)
             .done(function(data){
 				$("#search-dropdown").text("")

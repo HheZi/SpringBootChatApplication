@@ -3,6 +3,7 @@ package com.chat_app.model.projection;
 import java.time.Instant;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 
 import lombok.Builder;
 import lombok.Value;
@@ -11,13 +12,13 @@ import lombok.Value;
 @Builder
 public class MessageReadDTO {
 
-	private String message;
+	private String content;
 
 	private String sender;
 	
 	private String groupName;
 	
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
+	@JsonFormat(pattern = "HH:mm:ss", timezone = "UTC",  shape = Shape.STRING)
 	private Instant timestamp;
 	
 }

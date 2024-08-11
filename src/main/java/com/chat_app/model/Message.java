@@ -1,4 +1,4 @@
-package com.chat_app.model.websocket;
+package com.chat_app.model;
 
 import java.time.Instant;
 
@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,12 +18,13 @@ import lombok.Setter;
 @Setter
 @Document
 @EqualsAndHashCode
+@Builder
 public class Message {
 	
 	@Id
 	private String id;
 
-	private String message;
+	private String content;
 
 	private String sender;
 	

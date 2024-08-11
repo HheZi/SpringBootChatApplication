@@ -11,14 +11,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.chat_app.mapper.GroupMapper;
-import com.chat_app.mapper.MessageMapper;
+import com.chat_app.model.Group;
 import com.chat_app.model.projection.GroupReadDTO;
 import com.chat_app.model.projection.GroupWriteDTO;
 import com.chat_app.model.projection.MessageReadDTO;
-import com.chat_app.model.websocket.Group;
+import com.chat_app.model.projection.MessageWriteDTO;
 import com.chat_app.repository.GroupRepository;
 import com.chat_app.repository.MessageRepository;
+import com.chat_app.service.mapper.GroupMapper;
+import com.chat_app.service.mapper.MessageMapper;
 
 @Service
 public class ChatService {
@@ -37,7 +38,12 @@ public class ChatService {
 	
 	@Transactional	
 	public void createGroup(GroupWriteDTO dto) {
-		groupRepository.save(groupMapper.writeDtoToGroup(dto));
+		groupRepository.save(groupMapper.writeDtoToModel(dto));
+	}
+	
+	public MessageReadDTO saveMessageAndReturnDto(MessageWriteDTO message) {
+		return messageMapper.modelToReadDto(messageRepository
+				.save(messageMapper.writeDtoToModel(message)));
 	}
 
 	@Transactional(readOnly = true)
@@ -45,7 +51,7 @@ public class ChatService {
 		return groupRepository
 				.findByUsersName(username)
 				.stream()
-				.map(groupMapper::groupToReadDto)
+				.map(groupMapper::modelToReadDto)
 				.toList();
 	}
 	
@@ -54,7 +60,7 @@ public class ChatService {
 		return messageRepository
 				.findByGroupName(groupName)
 				.stream()
-				.map(messageMapper::messageToReadDto)
+				.map(messageMapper::modelToReadDto)
 				.toList();
 	}
 

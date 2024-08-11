@@ -3,7 +3,8 @@ package com.chat_app.repository;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
-import com.chat_app.model.websocket.Message;
+import com.chat_app.model.Message;
+
 import java.util.List;
 
 
