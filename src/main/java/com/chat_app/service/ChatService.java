@@ -3,6 +3,7 @@ package com.chat_app.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -41,6 +42,7 @@ public class ChatService {
 		groupRepository.save(groupMapper.writeDtoToModel(dto));
 	}
 	
+	@Transactional
 	public MessageReadDTO saveMessageAndReturnDto(MessageWriteDTO message) {
 		return messageMapper.modelToReadDto(messageRepository
 				.save(messageMapper.writeDtoToModel(message)));
@@ -49,7 +51,7 @@ public class ChatService {
 	@Transactional(readOnly = true)
 	public List<GroupReadDTO> getAllByUsername(String username) {
 		return groupRepository
-				.findByUsersName(username)
+				.findByUsersName(username, Limit.of(5))
 				.stream()
 				.map(groupMapper::modelToReadDto)
 				.toList();

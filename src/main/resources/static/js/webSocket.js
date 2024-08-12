@@ -7,11 +7,17 @@ document.addEventListener("DOMContentLoaded", connect)
 
 function onMessageReceived(resp){
 	const message = JSON.parse(resp.body);
-	addMessage(message);
+	var tag = $(`#${message.groupName.replaceAll(" ", "_")} .last-message`);
+	if(currentGroupName & message.groupName === currentGroupName){
+		addMessage(message);	
+	}
+	else{
+		tag.text("");
+		tag.append(`${message.content} <span class="badge badge-pill badge-light float-right">!</span>`);
+	}
+	tag.text(message.content)
+	$("#group-container").prepend($(`#${message.groupName.replaceAll(" ", "_")}`)).prependTo($("#group-container"));
 }
-
-
-
 
 function connect(){
 	stompClient = Stomp.over(new SockJS('/ws'));
@@ -23,15 +29,15 @@ function onConnected(){
 	.done((resp) => {
 		username = resp;
 		
-		
-		$.get(`/chat?username=${resp}`)
+		$.get(`/chat/groups?username=${resp}`)
 	    .then((data) => {
 			data.forEach((group) => {
-		        const row = `<div class="group-item" onclick="getChat('${group.groupName}', '${group.groupSocketUrl}')">
+		        const row = `<div class="group-item" onclick="getChat('${group.groupName}', 
+		        '${group.groupSocketUrl}')" id="${group.groupName.replaceAll(" ", "_")}">
 		                   <img src="https://via.placeholder.com/40" alt="Group Icon">
 		                   <div class="group-details">
 		                       <div class="group-name">${group.groupName}</div>
-		                       <div class="last-message">Last message</div>
+		                       <div class="last-message">Last message </div>
 		                   </div>
 		               </div>`;
 				$("#group-container").append(row);			
@@ -56,6 +62,7 @@ function addMessage(message){
 
 
 function getChat(groupName, groupSocketUrl){
+	$(`#${groupName.replaceAll(" ", "_")} .badge`).remove();
 	$(".chat-body").text("");
 	$("#sendBut").prop('disabled', false);
 	[currentGroupSocketUrl, currentGroupName] = [groupSocketUrl, groupName];
@@ -78,24 +85,24 @@ $("#sendBut").on("click", (e) => {
 		groupName: currentGroupName
 	}
 	stompClient.send("/app" + currentGroupSocketUrl, {}, JSON.stringify(message))
-	$("sendInput").val("");
+	$("#sendInput").val("");
 });
 
-$("#search-input").on("input", function(){
-			if($(this).val()){
-				$("#search-dropdown").val("");
+$("#search-input").on("keypress", function(e){
+			if(!(e.keyCode == 13))
 				return;
-			}
-						
             $.get(`/api/users?username=${$(this).val()}`)
             .done(function(data){
-				$("#search-dropdown").text("")
+				$(".search-dropdown").text("");
+				if(data.length == 0){
+					$(".search-dropdown").append("<div class='text-center m-3'>User is not found</div>");					
+				}
 				data.forEach(user => {
                     const item  = `<a href="#" class="dropdown-item text-center">
                         <img src="${user.avatarUrl}" alt="avatar" class="rounded-circle" width="30" height="30">
                         <span class="text-white">${user.username}</span>
                     </a>`;
-                    $("#search-dropdown").append(item);
+                    $(".search-dropdown").append(item);
                 }); 
 			})
             .fail(function(jqXHR, textStatus, errorThrown) {
@@ -106,3 +113,7 @@ $("#search-input").on("input", function(){
                 }
             })
         })
+        
+$("#search-input").on("focusout", function(e){
+	$(".search-dropdown").text("");
+})

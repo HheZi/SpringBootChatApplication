@@ -2,6 +2,7 @@ package com.chat_app.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Limit;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.repository.CrudRepository;
@@ -14,6 +15,6 @@ import com.chat_app.model.Group;
 public interface GroupRepository extends MongoRepository<Group, String>{
 
 	@Query("{usersName: {$contains: :usersName}}")
-	List<Group> findByUsersName(@Param("usersName") String usersName);
+	List<Group> findByUsersName(@Param("usersName") String usersName, Limit limit);
 	
 }

@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.chat_app.common.CommonsString;
 import com.chat_app.exception.ErrorAPIException;
 import com.chat_app.model.User;
 import com.chat_app.model.projection.GroupReadDTO;
@@ -40,18 +39,15 @@ public class ChatController {
 	
 	@Autowired
 	private ChatService service;
-	
-	@Autowired
-	private SimpMessagingTemplate messagingTemplate;
 
-	@GetMapping("/chat")
+	@GetMapping("/chat/groups")
 	public List<GroupReadDTO> getAllGroups(
 				@RequestParam(name = "username") String username
 			){
 		return service.getAllByUsername(username);
 	}
 	
-	@PostMapping("/chat")
+	@PostMapping("/chat/groups")
 	public void createGroup(@ModelAttribute @Validated GroupWriteDTO group, BindingResult result) {
 		if (result.hasErrors()) {
 			throw new ErrorAPIException(HttpStatus.NOT_ACCEPTABLE, result.getFieldError().getDefaultMessage());
@@ -67,14 +63,8 @@ public class ChatController {
 	}
 	
 	@MessageMapping("/user/{groupName}/queue/messages")
-	public void sendMessages(
-			@Payload  MessageWriteDTO message, 
-			@DestinationVariable("groupName") String groupName
-			) {
-//		if (result.hasErrors()) {
-//			throw new ErrorAPIException(HttpStatus.NOT_ACCEPTABLE, result.getFieldError().getDefaultMessage());
-//		}
-		messagingTemplate.convertAndSend(String.format(CommonsString.SOCKET_URL_PATTERN, groupName),
-				service.saveMessageAndReturnDto(message));
+	@SendTo("/user/{groupName}/queue/messages")
+	public MessageReadDTO sendMessages(@Payload  MessageWriteDTO message) {
+		return service.saveMessageAndReturnDto(message);
 	}
 }

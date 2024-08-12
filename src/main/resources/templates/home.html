@@ -15,13 +15,15 @@
     <div class="container-fluid">
     	<div th:replace="~{fragments::alerts}"></div>
         <div class="row h-100">
-            <div class="col-3 sidebar" id="group-container">
+            <div class="col-3 sidebar">
             	<div class="mb-3">
                     <input type="text" class="form-control" id="search-input" placeholder="Search users">
-                    <div class="search-dropdown" id="search-dropdown">
+                    <div class="search-dropdown">
                     </div>
                 </div>
                 <h4>Groups</h4>
+                <div id="group-container">
+                </div>
             </div>
             <div class="col-9 chat">
                 <div class="chat-header">
