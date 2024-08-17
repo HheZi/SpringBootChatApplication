@@ -10,4 +10,6 @@ public class GroupReadDTO {
 	private String groupName;
 	
 	private String groupSocketUrl;
+	
+	private String lastMessage;
 }

@@ -34,7 +34,6 @@ import com.chat_app.service.ChatService;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@Slf4j
 public class ChatController {
 	
 	@Autowired
@@ -44,7 +43,7 @@ public class ChatController {
 	public List<GroupReadDTO> getAllGroups(
 				@RequestParam(name = "username") String username
 			){
-		return service.getAllByUsername(username);
+		return service.getAllGroupsByUsername(username);
 	}
 	
 	@PostMapping("/chat/groups")

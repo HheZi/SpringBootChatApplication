@@ -3,6 +3,7 @@ package com.chat_app.model;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -25,4 +26,6 @@ public class Group {
 	private String groupName;
 	
 	private List<String> usersName;
+	
+	private List<Message> lastMessage;
 }

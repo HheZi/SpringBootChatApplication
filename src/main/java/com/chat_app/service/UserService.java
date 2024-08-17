@@ -3,6 +3,7 @@ package com.chat_app.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Limit;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -40,7 +41,7 @@ public class UserService implements UserDetailsService{
 	@Transactional(readOnly = true)	
 	public List<UserReadDTO> getUsersByUsername(String username){
 		return userReposiory
-				.findByUsernameIsStartingWithIgnoreCase(username)
+				.findByUsernameIsStartingWithIgnoreCase(username, Limit.of(5))
 				.stream()
 				.map(userMapper::userToReadDTO)
 				.toList();

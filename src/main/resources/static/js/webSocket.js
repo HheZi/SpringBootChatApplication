@@ -8,14 +8,14 @@ document.addEventListener("DOMContentLoaded", connect)
 function onMessageReceived(resp){
 	const message = JSON.parse(resp.body);
 	var tag = $(`#${message.groupName.replaceAll(" ", "_")} .last-message`);
-	if(currentGroupName & message.groupName === currentGroupName){
-		addMessage(message);	
+	if(message.groupName === currentGroupName){
+		displayMessage(message);	
+		tag.text(message.content)
 	}
 	else{
 		tag.text("");
 		tag.append(`${message.content} <span class="badge badge-pill badge-light float-right">!</span>`);
 	}
-	tag.text(message.content)
 	$("#group-container").prepend($(`#${message.groupName.replaceAll(" ", "_")}`)).prependTo($("#group-container"));
 }
 
@@ -28,6 +28,7 @@ function onConnected(){
 	$.get("/api/users/auth")
 	.done((resp) => {
 		username = resp;
+		$("#username").text(username);
 		
 		$.get(`/chat/groups?username=${resp}`)
 	    .then((data) => {
@@ -37,7 +38,7 @@ function onConnected(){
 		                   <img src="https://via.placeholder.com/40" alt="Group Icon">
 		                   <div class="group-details">
 		                       <div class="group-name">${group.groupName}</div>
-		                       <div class="last-message">Last message </div>
+		                       <div class="last-message">${group.lastMessage}</div>
 		                   </div>
 		               </div>`;
 				$("#group-container").append(row);			
@@ -48,7 +49,7 @@ function onConnected(){
 	
 }
 
-function addMessage(message){
+function displayMessage(message){
 	let tagPos = (username === message.sender) ? "float-right" : "float-left";
 	const row = `<div class="message ${tagPos}">
                   <div class="message-content">
@@ -58,11 +59,16 @@ function addMessage(message){
                  </div>
               </div>`;
 	$(".chat-body").append(row);
+	$(".chat-body").scrollTop($(".chat-body").prop('scrollHeight'));
 }
 
 
 function getChat(groupName, groupSocketUrl){
+	if(groupName === currentGroupName)
+		return;
+	
 	$(`#${groupName.replaceAll(" ", "_")} .badge`).remove();
+	$("#sendInput").val("");
 	$(".chat-body").text("");
 	$("#sendBut").prop('disabled', false);
 	[currentGroupSocketUrl, currentGroupName] = [groupSocketUrl, groupName];
@@ -71,7 +77,7 @@ function getChat(groupName, groupSocketUrl){
 	$.get(`chat/messages?groupName=${groupName}`)
 	.done((data) =>{
 		data.forEach((message) => {
-			addMessage(message)
+			displayMessage(message)
 		})
 	});
 }

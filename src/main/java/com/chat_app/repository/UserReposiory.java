@@ -1,5 +1,6 @@
 package com.chat_app.repository;
 
+import org.springframework.data.domain.Limit;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
@@ -13,5 +14,5 @@ import java.util.Optional;
 public interface UserReposiory extends CrudRepository<User, Integer>, ListCrudRepository<User, Integer>{
 	public Optional<User> findByUsername(String username);
 	
-	public List<User> findByUsernameIsStartingWithIgnoreCase(String username);
+	public List<User> findByUsernameIsStartingWithIgnoreCase(String username, Limit limit);
 }

@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.chat_app.model.Group;
+import com.chat_app.model.Message;
 import com.chat_app.model.projection.GroupReadDTO;
 import com.chat_app.model.projection.GroupWriteDTO;
 import com.chat_app.model.projection.MessageReadDTO;
@@ -39,21 +42,21 @@ public class ChatService {
 	
 	@Transactional	
 	public void createGroup(GroupWriteDTO dto) {
-		groupRepository.save(groupMapper.writeDtoToModel(dto));
+		groupRepository.save(groupMapper.writeDtoToGroup(dto));
 	}
 	
 	@Transactional
 	public MessageReadDTO saveMessageAndReturnDto(MessageWriteDTO message) {
-		return messageMapper.modelToReadDto(messageRepository
-				.save(messageMapper.writeDtoToModel(message)));
+		return messageMapper.messageToReadDto(messageRepository
+				.save(messageMapper.writeDtoToMessage(message)));
 	}
 
 	@Transactional(readOnly = true)
-	public List<GroupReadDTO> getAllByUsername(String username) {
+	public List<GroupReadDTO> getAllGroupsByUsername(String username) {
 		return groupRepository
-				.findByUsersName(username, Limit.of(5))
+				.findByUsersNameWithLastMessage(username)
 				.stream()
-				.map(groupMapper::modelToReadDto)
+				.map(groupMapper::groupToReadDto)
 				.toList();
 	}
 	
@@ -62,7 +65,7 @@ public class ChatService {
 		return messageRepository
 				.findByGroupName(groupName)
 				.stream()
-				.map(messageMapper::modelToReadDto)
+				.map(messageMapper::messageToReadDto)
 				.toList();
 	}
 
