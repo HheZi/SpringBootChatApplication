@@ -112,3 +112,24 @@ body {
 	align-self: flex-end;
 	margin-top: 5px;
 }
+
+#newGroupContainer{
+	bottom: 0;
+	position: absolute;	
+}
+
+.usersInGroupContainer{
+	background: #85598e;
+	padding: 3px;
+}
+
+.deleteBut{
+	text-decoration: none;
+	color: white
+}
+
+.deleteBut:hover{
+	color: red;
+	text-decoration: none;
+	cursor: pointer;
+}

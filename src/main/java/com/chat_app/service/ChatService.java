@@ -41,8 +41,8 @@ public class ChatService {
 	private MessageMapper messageMapper;
 	
 	@Transactional	
-	public void createGroup(GroupWriteDTO dto) {
-		groupRepository.save(groupMapper.writeDtoToGroup(dto));
+	public GroupReadDTO createGroup(GroupWriteDTO dto) {
+		return groupMapper.groupToReadDto(groupRepository.save(groupMapper.writeDtoToGroup(dto)));
 	}
 	
 	@Transactional

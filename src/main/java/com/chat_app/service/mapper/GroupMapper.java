@@ -1,5 +1,6 @@
 package com.chat_app.service.mapper;
 
+import java.lang.reflect.Array;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -14,6 +15,8 @@ import com.chat_app.model.projection.MessageReadDTO;
 public class GroupMapper {
 
 	private final String SOCKET_URL_PATTERN = "/user/%s/queue/messages";
+	
+	private final String LAST_MESSAGE_FORMAT = "%s: %s";
 
 	public Group writeDtoToGroup(GroupWriteDTO dto) {
 		return Group.builder()
@@ -26,7 +29,9 @@ public class GroupMapper {
 		return GroupReadDTO.builder()
 				.groupName(entity.getGroupName())
 				.groupSocketUrl(String.format(SOCKET_URL_PATTERN, entity.getId().substring(0, 5)))
-				.lastMessage(entity.getLastMessage().get(0).getContent())
+				.lastMessage(String.format(LAST_MESSAGE_FORMAT, entity.getLastMessage().get(0).getSender(),
+							entity.getLastMessage().get(0).getContent()))
+				.usersInGroup(entity.getUsersName().toArray(new String[entity.getUsersName().size()]))
 				.build();
 	}
 }

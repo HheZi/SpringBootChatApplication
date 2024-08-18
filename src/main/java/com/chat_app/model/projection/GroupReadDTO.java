@@ -11,5 +11,8 @@ public class GroupReadDTO {
 	
 	private String groupSocketUrl;
 	
-	private String lastMessage;
+	@Builder.Default
+	private String lastMessage = "";
+	
+	private String[] usersInGroup;
 }

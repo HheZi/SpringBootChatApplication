@@ -1,6 +1,7 @@
 package com.chat_app.controller.api;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.quartz.JobStoreType;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.chat_app.exception.ErrorAPIException;
+import com.chat_app.model.Group;
 import com.chat_app.model.User;
 import com.chat_app.model.projection.GroupReadDTO;
 import com.chat_app.model.projection.GroupWriteDTO;
@@ -33,8 +35,11 @@ import com.chat_app.service.ChatService;
 
 import lombok.extern.slf4j.Slf4j;
 
-@RestController
+@RestController()
 public class ChatController {
+	
+	@Autowired
+	private SimpMessagingTemplate messagingTemplate;
 	
 	@Autowired
 	private ChatService service;
@@ -51,10 +56,13 @@ public class ChatController {
 		if (result.hasErrors()) {
 			throw new ErrorAPIException(HttpStatus.NOT_ACCEPTABLE, result.getFieldError().getDefaultMessage());
 		}
-		service.createGroup(group);
+		GroupReadDTO dto = service.createGroup(group);
+		Stream.of(dto.getUsersInGroup())
+		.forEach(t -> messagingTemplate.convertAndSend("/user/"+t, dto));
+		
 	}
 	
-	@GetMapping("chat/messages")
+	@GetMapping("/chat/messages")
 	public List<MessageReadDTO> getMessages(
 				@RequestParam(name = "groupName") String groupName
 			) {
