@@ -32,7 +32,7 @@ function onConnected(){
 	$.get("/api/users/auth")
 	.done((usernameResp) => {
 		username = usernameResp;
-		stompClient.subscribe("/user/"+usernameResp, onGroupReceived)
+		stompClient.subscribe("/chat/queue", onGroupReceived)
 		$("#username").text(usernameResp);
 		
 		$.get(`/chat/groups?username=${usernameResp}`)
@@ -133,6 +133,7 @@ function addToUsersInGroup(usernameToAdd){
     </span>`;
      $("#selectedUsers").append(tag);
      $(".groupUsers-search-dropdown").text("");	
+	 $("#searchUsersInModal").val("");
 }
 
 function deleteUserFromGroup(usernameToDel){
@@ -182,20 +183,28 @@ $(document).ready(function () {
 
     $('#createGroupButton').click(function () {
 		if(usersInGroups.length === 0){
-			 $("#error-message").removeClass("d-lg-none").text("At least one user required").addClass("show");
+			 showMessage("At least one user need to be in group", "error-message")
 		}
-        $.post("/chat/groups",  JSON.stringify({
-			groupName: $('#groupNameInput').val(),
-			description: $('#groupDescriptionInput').val(),
-			usersName: usersInGroups
-		}))
-		.done(() => {
-        	usersInGroups = [];
-			showMessage("You have created the group!", "success-message")
-		})
-		.fail((resp) => {
-			showMessage(resp.responseJSON.message, "error-message")
-		})
+        $.ajax({
+		    url: "/chat/groups",
+		    type: "POST",
+		    data: JSON.stringify({
+		        groupName: $('#groupNameInput').val(),
+		        description: $('#groupDescriptionInput').val(),
+		        usersName: usersInGroups
+		    }),
+		    contentType: "application/json",  
+		    success: function() {
+		        usersInGroups = [];
+		        $("#selectedUsers").text("");
+		        $('#groupNameInput').val("");
+		        $('#groupDescriptionInput').val("");
+		        showMessage("You have created the group!", "success-message");
+		    },
+		    error: function(resp) {
+		        showMessage(resp.responseJSON.message, "error-message");
+		    }
+		});
     });
 });
 

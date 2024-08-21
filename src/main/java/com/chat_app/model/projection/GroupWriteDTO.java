@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.Value;
 
 @Getter
@@ -18,12 +19,13 @@ import lombok.Value;
 @Setter
 @AllArgsConstructor
 @Builder
+@ToString
 public class GroupWriteDTO {
 	
 	@Nullable
 	private String groupName;
 	
-	@NotEmpty(message = "Users name's can't be empty")
+	@NotEmpty(message = "At least one user need to be in group")
 	private String[] usersName;
 	
 	@Nullable
