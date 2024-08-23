@@ -1,5 +1,7 @@
 package com.chat_app.model.projection;
 
+import java.util.List;
+
 import lombok.Builder;
 import lombok.Value;
 
@@ -14,5 +16,5 @@ public class GroupReadDTO {
 	@Builder.Default
 	private String lastMessage = "";
 	
-	private String[] usersInGroup;
+	private List<String> usersInGroup;
 }

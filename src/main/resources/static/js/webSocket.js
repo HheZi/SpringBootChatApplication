@@ -32,10 +32,10 @@ function onConnected(){
 	$.get("/api/users/auth")
 	.done((usernameResp) => {
 		username = usernameResp;
-		stompClient.subscribe("/chat/queue", onGroupReceived)
+		stompClient.subscribe("/user/group/creation", onGroupReceived)
 		$("#username").text(usernameResp);
 		
-		$.get(`/chat/groups?username=${usernameResp}`)
+		$.get(`/chat/groups`)
 	    .then((data) => {
 			data.forEach((group) => {
 		        displayChat(group)
@@ -185,26 +185,16 @@ $(document).ready(function () {
 		if(usersInGroups.length === 0){
 			 showMessage("At least one user need to be in group", "error-message")
 		}
-        $.ajax({
-		    url: "/chat/groups",
-		    type: "POST",
-		    data: JSON.stringify({
+		stompClient.send("/app/group/creation", {},JSON.stringify({
 		        groupName: $('#groupNameInput').val(),
 		        description: $('#groupDescriptionInput').val(),
 		        usersName: usersInGroups
-		    }),
-		    contentType: "application/json",  
-		    success: function() {
-		        usersInGroups = [];
-		        $("#selectedUsers").text("");
-		        $('#groupNameInput').val("");
-		        $('#groupDescriptionInput').val("");
-		        showMessage("You have created the group!", "success-message");
-		    },
-		    error: function(resp) {
-		        showMessage(resp.responseJSON.message, "error-message");
-		    }
-		});
+		}))
+		usersInGroups = [];
+		$("#selectedUsers").text("");
+		$('#groupNameInput').val("");
+	    $('#groupDescriptionInput').val("");
+		showMessage("You have created the group!", "success-message");
     });
 });
 

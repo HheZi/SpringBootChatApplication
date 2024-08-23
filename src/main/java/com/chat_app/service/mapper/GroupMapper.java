@@ -14,14 +14,14 @@ import com.chat_app.model.projection.MessageReadDTO;
 @Service
 public class GroupMapper {
 
-	private final String SOCKET_URL_PATTERN = "/chat/%s/queue/messages";
+	private final String SOCKET_URL_PATTERN = "/messages/%s";
 	
 	private final String LAST_MESSAGE_FORMAT = "%s: %s";
 
 	public Group writeDtoToGroup(GroupWriteDTO dto) {
 		return Group.builder()
 				.groupName(dto.getGroupName())
-				.usersName(List.of(dto.getUsersName())	)
+				.usersName(List.of(dto.getUsersName()))
 				.build();
 	}
 
@@ -32,7 +32,7 @@ public class GroupMapper {
 				.lastMessage(entity.getLastMessage() == null || entity.getLastMessage().isEmpty() 
 							?  "" : String.format(LAST_MESSAGE_FORMAT, entity.getLastMessage().get(0).getSender(),
 							entity.getLastMessage().get(0).getContent()))
-				.usersInGroup(entity.getUsersName().toArray(new String[entity.getUsersName().size()]))
+				.usersInGroup(entity.getUsersName())
 				.build();
 	}
 }

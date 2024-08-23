@@ -16,18 +16,18 @@ import com.chat_app.model.projection.GroupReadDTO;
 @Repository
 public interface GroupRepository extends MongoRepository<Group, String>{
 
-	@Aggregation(pipeline = "{"
-			+ "$lookup: {"
-			+ "	from: \"message\","
-			+ "	localField: \"groupName\","
-			+ "	foreignField: \"groupName\","
-			+ "	as: \"lastMessage\","
-			+ "	pipeline: ["
-			+ "    {$sort: {\"timestamp\": -1}},"
-			+ "    {$limit: 1}"
-			+ "	]"
-			+ "	}"
-			+ "} ")
+	@Aggregation(pipeline = {
+			"{$match: {usersName: ?0}}",
+			"{$lookup: {"
+			+ "from: 'message',"
+			+ "localField: 'groupName',"
+			+ "foreignField: 'groupName',"
+			+ "as: 'lastMessage',"
+			+ "pipeline: ["
+			+ "{$sort: {timestamp: -1}},"
+			+ "{$limit: 1}"
+			+ "]}}"
+	})
 	List<Group> findByUsersNameWithLastMessage(String usersName);
 	
 	
