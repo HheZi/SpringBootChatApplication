@@ -26,7 +26,8 @@ public interface GroupRepository extends MongoRepository<Group, String>{
 			+ "pipeline: ["
 			+ "{$sort: {timestamp: -1}},"
 			+ "{$limit: 1}"
-			+ "]}}"
+			+ "]}}",
+			"{$sort: {'lastMessage.timestamp': -1}}"
 	})
 	List<Group> findByUsersNameWithLastMessage(String usersName);
 	

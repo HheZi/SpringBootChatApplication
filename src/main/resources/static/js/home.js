@@ -129,7 +129,7 @@ function searchUsers(e, dropdownClass, inputClass, inModal = false){
 function addToUsersInGroup(usernameToAdd){
 	usersInGroups.push(usernameToAdd);
 	const tag = `<span class="usersInGroupContainer mr-2" id="${usernameToAdd}User">
-               <span>${usernameToAdd}</span> <a class="deleteBut" onclick="deleteUserFromGroup('${usernameToAdd}')">X</a>
+               <span>${usernameToAdd}</span> <a class="deleteBut" onclick="deleteUserFromGroup('${usernameToAdd}')">&times;</a>
     </span>`;
      $("#selectedUsers").append(tag);
      $(".groupUsers-search-dropdown").text("");	
@@ -176,6 +176,7 @@ $(document).ready(function () {
         e.preventDefault();
         $('#createGroupModal').modal('show');
     });
+    
 
     $('#closeModalButton, .btn-secondary').click(function () {
         $('#createGroupModal').modal('hide');
