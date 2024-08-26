@@ -1,5 +1,5 @@
 let stompClient;
-let username;
+let usernameOfCurrentUser;
 let currentGroupSocketUrl;
 let currentGroupName;
 let usersInGroups = [];
@@ -31,7 +31,7 @@ function connect(){
 function onConnected(){
 	$.get("/api/users/auth")
 	.done((usernameResp) => {
-		username = usernameResp;
+		usernameOfCurrentUser = usernameResp;
 		stompClient.subscribe("/user/group/creation", onGroupReceived)
 		$("#username").text(usernameResp);
 		
@@ -46,7 +46,7 @@ function onConnected(){
 }
 
 function displayMessage(message){
-	let tagPos = (username === message.sender) ? "float-right" : "float-left";
+	let tagPos = (usernameOfCurrentUser === message.sender) ? "float-right" : "float-left";
 	const row = `<div class="message ${tagPos}">
                   <div class="message-content">
                    <span class="sender-name">${message.sender}</span>
@@ -103,13 +103,15 @@ function searchUsers(e, dropdownClass, inputClass, inModal = false){
 					$(dropdownClass).append("<div class='text-center m-3'>User is not found</div>");					
 				}
 				data.forEach(user => {
-                    const item  = `<a ${(inModal) ? `onclick='addToUsersInGroup("${user.username}")'` : ""} 
-                    				class="dropdown-item text-center">
+                    const item  = `<a ${(inModal) ? `onclick='addToUsersInGroup("${user.username}")'` : 
+                    			`onclick='getInfoAboutUser("${user.username}")'` } 
+                    				class="dropdown-item text-center" data-toggle="modal" data-target="#profileModal">
                         <img src="${user.avatarUrl}" alt="avatar" class="rounded-circle" width="30" height="30">
                         <span class="text-white">${user.username}</span>
                     </a>`;
                     $(dropdownClass).append(item);
                 }); 
+                $("#clearUsersDropdown").removeClass("d-none");
 			})
             .fail(function(jqXHR, textStatus, errorThrown) {
                 if (jqXHR.status >= 400 && jqXHR.status < 500) {
@@ -148,6 +150,34 @@ function showMessage(message, idTag){
     }, 5000);
 }
 
+function getInfoAboutUser(username){
+	$("#profileModalFooter").text("");
+	$("#profileDesc").addClass("text-dark");
+	$("#profileUsername").addClass("text-dark");
+	$('#profileDesc').attr('readonly', true);
+	$('#profileUsername').attr('readonly', true);
+	$.get(`/api/users/${username}`)
+	.done((user) => {
+		$("#profileUsername").val(user.username);
+		$("#profileDesc").val(user.description || user.username + " doesn't have a profile description");
+		$("#profileModal").modal("show");
+		if(user.username === usernameOfCurrentUser){
+			$("#profileDesc").val(user.description || "");
+			$("#profileDesc").removeClass("text-dark");
+			$("#profileUsername").removeClass("text-dark");
+			$('#profileDesc').attr('readonly', false);
+			$('#profileUsername').attr('readonly', false);
+			$("#profileModalFooter").append(`<button type="button" class="btn btn-primary">Save changes</button>`)			
+		}
+		else{
+			$("#profileModalFooter").append(`<button type="button" class="btn btn-primary">Write to ${user.username}</button>`)	
+		}
+	})
+	.fail((fail) =>  {
+		showMessage(fail.responseJSON.message, "error-message")
+	})
+}
+
 
 $(document).ready(function () {
 	connect();
@@ -157,7 +187,7 @@ $(document).ready(function () {
     	return;
     const message = {
 		content: $("#sendInput").val(),
-		sender: username,
+		sender: usernameOfCurrentUser,
 		groupName: currentGroupName
 	}
 	stompClient.send("/app" + currentGroupSocketUrl, {}, JSON.stringify(message))
@@ -166,9 +196,11 @@ $(document).ready(function () {
 	
 	$("#searchUsers").on("keypress",(e) => searchUsers(e, ".search-dropdown", "#searchUsers", false))
 	
-	$("#searchUsers").on("focusout", function(){
+	$("#clearUsersDropdown").on("click", function(){
 		$("#searchDropdown").text("");
-	})
+		$(this).addClass("d-none");
+		$("#searchUsers").val("");
+	});
 
 	$("#searchUsersInModal").on("keypress",(e) => searchUsers(e, ".groupUsers-search-dropdown", "#searchUsersInModal", true))
 	
@@ -177,9 +209,9 @@ $(document).ready(function () {
         $('#createGroupModal').modal('show');
     });
     
-
     $('#closeModalButton, .btn-secondary').click(function () {
         $('#createGroupModal').modal('hide');
+       
     });
 
     $('#createGroupButton').click(function () {

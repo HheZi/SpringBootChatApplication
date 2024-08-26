@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Limit;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.chat_app.exception.ErrorAPIException;
 import com.chat_app.model.User;
 import com.chat_app.model.enums.Status;
 import com.chat_app.model.projection.UserReadDTO;
@@ -37,7 +39,13 @@ public class UserService implements UserDetailsService{
 		return userReposiory.findByUsername(username)
 				.orElseThrow((() -> new UsernameNotFoundException("User is not found")));
 	}
-
+	
+	public UserReadDTO getUserByUsername(String username) {
+		return userReposiory.findByUsername(username)
+				.map(userMapper::userToReadDTO)
+				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "The user is not found"));
+	}
+	
 	@Transactional(readOnly = true)	
 	public List<UserReadDTO> getUsersByUsername(String username){
 		return userReposiory
@@ -65,6 +73,9 @@ public class UserService implements UserDetailsService{
 	}
 	
 	public boolean isUsernameIsTheSameAsAuth(String username) {
-		return SecurityContextHolder.getContext().getAuthentication().getName().equals(username);	
+		return SecurityContextHolder.getContext()
+				.getAuthentication()
+				.getName()
+				.equals(username);	
 	}
 }

@@ -50,6 +50,8 @@ public class User implements UserDetails{
 
 	private String avatar;
 	
+	private String description;
+	
 	@CreatedDate
 	@Column("created_at")
 	private Instant createdAt;
