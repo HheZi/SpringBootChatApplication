@@ -45,6 +45,15 @@ function onConnected(){
 	
 }
 
+function createGroup(groupName, description, usersInGroups, chatType){
+	stompClient.send("/app/group/creation", {}, JSON.stringify({
+		'groupName': groupName,
+		'description': description,
+		'usersName': usersInGroups,
+		'chatType': chatType
+	}))
+}
+
 function displayMessage(message){
 	let tagPos = (usernameOfCurrentUser === message.sender) ? "float-right" : "float-left";
 	const row = `<div class="message ${tagPos}">
@@ -59,11 +68,18 @@ function displayMessage(message){
 }
 
 function displayChat(chat){
-	const row = `<div class="group-item" onclick="getChat('${chat.groupName}', 
-		        '${chat.groupSocketUrl}')" id="${chat.groupName.replaceAll(" ", "_")}">
+	let groupName;
+	if(chat.chatType === 'PRIVATE'){
+		groupName = chat.groupName.split("_")
+		.find((userName) => userName !== usernameOfCurrentUser)
+	}
+	else
+		groupName = chat.groupName;
+	const row = `<div class="group-item" onclick="getChat('${groupName}', 
+		        '${chat.groupSocketUrl}')" id="${groupName.replaceAll(" ", "_")}">
 		                   <img src="https://via.placeholder.com/40" alt="Group Icon">
 		                   <div class="group-details">
-		                       <div class="group-name">${chat.groupName}</div>
+		                       <div class="group-name">${groupName}</div>
 		                       <div class="last-message">${chat.lastMessage}</div>
 		                   </div>
 		               </div>`;
@@ -105,25 +121,21 @@ function searchUsers(e, dropdownClass, inputClass, inModal = false){
 				data.forEach(user => {
                     const item  = `<a ${(inModal) ? `onclick='addToUsersInGroup("${user.username}")'` : 
                     			`onclick='getInfoAboutUser("${user.username}")'` } 
-                    				class="dropdown-item text-center" data-toggle="modal" data-target="#profileModal">
+                    				class="dropdown-item text-center">
                         <img src="${user.avatarUrl}" alt="avatar" class="rounded-circle" width="30" height="30">
                         <span class="text-white">${user.username}</span>
                     </a>`;
                     $(dropdownClass).append(item);
                 }); 
-                $("#clearUsersDropdown").removeClass("d-none");
+                if(!inModal)
+               		$("#clearUsersDropdown").removeClass("d-none");
 			})
-            .fail(function(jqXHR, textStatus, errorThrown) {
-                if (jqXHR.status >= 400 && jqXHR.status < 500) {
+            .fail(function(fail) {
+                if (fail.status >= 400 && fail.status < 500) {
 					showMessage(jqXHR.responseJSON.message, "error-message")
                 } else {
 					showMessage("An unexpected error occurred. Please try again later.", "error-message")
                 }
-            })
-            .always(function(){
-                setTimeout(function() {
-                    $(".alert").removeClass("show");
-                }, 5000);
             })
         }
         
@@ -167,10 +179,13 @@ function getInfoAboutUser(username){
 			$("#profileUsername").removeClass("text-dark");
 			$('#profileDesc').attr('readonly', false);
 			$('#profileUsername').attr('readonly', false);
-			$("#profileModalFooter").append(`<button type="button" class="btn btn-primary">Save changes</button>`)			
+			$("#profileModalFooter").append(`<button type="button" class="btn btn-primary">Save changes</button>`);		
 		}
 		else{
-			$("#profileModalFooter").append(`<button type="button" class="btn btn-primary">Write to ${user.username}</button>`)	
+			$("#profileModalFooter").append(`<button type="button" id="writeToUserBut" class="btn btn-primary">Write to ${user.username}</button>`);
+			$("#writeToUserBut").on("click", function(){
+				createGroup(`${user.username}_${usernameOfCurrentUser}`, null, [user.username, usernameOfCurrentUser], "PRIVATE")
+			})
 		}
 	})
 	.fail((fail) =>  {
@@ -211,23 +226,19 @@ $(document).ready(function () {
     
     $('#closeModalButton, .btn-secondary').click(function () {
         $('#createGroupModal').modal('hide');
-       
+        usersInGroups = [];
     });
 
     $('#createGroupButton').click(function () {
 		if(usersInGroups.length === 0){
 			 showMessage("At least one user need to be in group", "error-message")
 		}
-		stompClient.send("/app/group/creation", {},JSON.stringify({
-		        groupName: $('#groupNameInput').val(),
-		        description: $('#groupDescriptionInput').val(),
-		        usersName: usersInGroups
-		}))
+		createGroup($('#groupNameInput').val(), $('#groupDescriptionInput').val(), usersInGroups, "GROUP")
 		usersInGroups = [];
 		$("#selectedUsers").text("");
 		$('#groupNameInput').val("");
 	    $('#groupDescriptionInput').val("");
-		showMessage("You have created the group!", "success-message");
+	    showMessage("You have created the group!", "success-message");
     });
 });
 

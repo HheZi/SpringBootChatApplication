@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.chat_app.exception.ErrorAPIException;
-import com.chat_app.model.projection.GroupReadDTO;
-import com.chat_app.model.projection.GroupWriteDTO;
+import com.chat_app.model.projection.ChatReadDTO;
+import com.chat_app.model.projection.ChatWriteDTO;
 import com.chat_app.model.projection.MessageReadDTO;
 import com.chat_app.model.projection.MessageWriteDTO;
 import com.chat_app.service.ChatService;
@@ -43,13 +43,13 @@ public class ChatController {
 	private ChatService service;
 
 	@GetMapping("/chat/groups")
-	public List<GroupReadDTO> getAllGroups(Principal principal){
+	public List<ChatReadDTO> getAllGroups(Principal principal){
 		return service.getAllGroupsByUsername(principal.getName());
 	}
 	
 	@MessageMapping("/group/creation")
-	public ResponseEntity<?> createGroup(@Payload GroupWriteDTO group) {
-		GroupReadDTO dto = service.createGroup(group);
+	public ResponseEntity<?> createGroup(@Payload ChatWriteDTO group) {
+		ChatReadDTO dto = service.createGroup(group);
 		dto.getUsersInGroup()
 		.forEach(t -> {
 			messagingTemplate.convertAndSendToUser(t, "/group/creation", dto);

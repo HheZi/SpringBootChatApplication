@@ -10,11 +10,11 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.chat_app.model.Group;
-import com.chat_app.model.projection.GroupReadDTO;
+import com.chat_app.model.Chat;
+import com.chat_app.model.projection.ChatReadDTO;
 
 @Repository
-public interface GroupRepository extends MongoRepository<Group, String>{
+public interface GroupRepository extends MongoRepository<Chat, String>{
 
 	@Aggregation(pipeline = {
 			"{$match: {usersName: ?0}}",
@@ -29,7 +29,7 @@ public interface GroupRepository extends MongoRepository<Group, String>{
 			+ "]}}",
 			"{$sort: {'lastMessage.timestamp': -1}}"
 	})
-	List<Group> findByUsersNameWithLastMessage(String usersName);
+	List<Chat> findByUsersNameWithLastMessage(String usersName);
 	
 	
 }

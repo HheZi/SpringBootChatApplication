@@ -6,6 +6,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.chat_app.model.enums.ChatType;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,7 +20,7 @@ import lombok.Setter;
 @Setter
 @Builder
 @Document
-public class Group {
+public class Chat {
 	
 	@Id
 	private String id;
@@ -28,4 +30,6 @@ public class Group {
 	private List<String> usersName;
 	
 	private List<Message> lastMessage;
+	
+	private ChatType chatType;
 }
