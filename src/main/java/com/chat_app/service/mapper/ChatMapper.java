@@ -31,7 +31,7 @@ public class ChatMapper {
 	public ChatReadDTO groupToReadDto(Chat entity) {
 		return ChatReadDTO.builder()
 				.chatName(entity.getChatName())
-				.groupSocketUrl(String.format(SOCKET_URL_PATTERN, entity.hashCode()))
+				.groupSocketUrl(String.format(SOCKET_URL_PATTERN, entity.getId().substring(0,15)))
 				.lastMessage(entity.getLastMessage() == null || entity.getLastMessage().isEmpty() 
 							?  "" : String.format(LAST_MESSAGE_FORMAT, entity.getLastMessage().get(0).getSender(),
 							entity.getLastMessage().get(0).getContent()))

@@ -32,7 +32,7 @@ function onConnected(){
 	$.get("/api/users/auth")
 	.done((usernameResp) => {
 		usernameOfCurrentUser = usernameResp;
-		stompClient.subscribe("/user/group/creation", onGroupReceived)
+		stompClient.subscribe("/user/chat/creation", onGroupReceived)
 		$("#username").text(usernameResp);
 		
 		$.get(`/chat/groups`)
@@ -46,7 +46,7 @@ function onConnected(){
 }
 
 function createGroup(groupName, description, usersInGroups, chatType){
-	stompClient.send("/app/group/creation", {}, JSON.stringify({
+	stompClient.send("/app/chat/creation", {}, JSON.stringify({
 		'chatName': groupName,
 		'description': description,
 		'usersName': usersInGroups,
@@ -67,16 +67,20 @@ function displayMessage(message){
 	$(".chat-body").scrollTop($(".chat-body").prop('scrollHeight'));
 }
 
-function displayChat(chat){
-	let groupName;
-	if(chat.chatType === 'PRIVATE'){
-		groupName = chat.chatName.split("_")
-		.find((userName) => userName !== usernameOfCurrentUser)
+function calculateChatName(chatName, chatType){
+	if(chatType === 'PRIVATE'){
+		return chatName.split("_").find((userName) => userName !== usernameOfCurrentUser);
 	}
 	else
-		groupName = chat.chatName;
-	const row = `<div class="group-item" onclick="getChat('${chat.chatName}', 
-		        '${chat.groupSocketUrl}')" id="${groupName.replaceAll(" ", "_")}">
+		return chatName;
+	
+}
+
+function displayChat(chat){
+	let groupName = calculateChatName(chat.chatName, chat.chatType);
+	
+	const row = `<div class="group-item" onclick="getChat('${chat.chatName}', '${chat.chatType}', '${chat.groupSocketUrl}', 
+		        '${chat.groupSocketUrl}')" id="${chat.chatName.replaceAll(" ", "_")}">
 		                   <img src="https://via.placeholder.com/40" alt="Group Icon">
 		                   <div class="group-details">
 		                       <div class="group-name">${groupName}</div>
@@ -88,7 +92,7 @@ function displayChat(chat){
 }
 
 
-function getChat(groupName, groupSocketUrl){
+function getChat(groupName, chatType, groupSocketUrl){
 	if(groupName === currentChatName)
 		return;
 	
@@ -97,8 +101,8 @@ function getChat(groupName, groupSocketUrl){
 	$(".chat-body").text("");
 	$("#sendBut").prop('disabled', false);
 	$("#sendInput").prop('disabled', false);
-	[currentGroupSocketUrl, currentChatName] = [groupSocketUrl, groupName];
-	$("#chatName").text(groupName);
+	$("#chatName").text(calculateChatName(groupName, chatType));
+	[currentChatName, currentGroupSocketUrl] = [groupName, groupSocketUrl];
 
 	$.get(`chat/messages?groupName=${groupName}`)
 	.done((data) =>{
@@ -184,12 +188,19 @@ function getInfoAboutUser(username){
 		else{
 			$("#profileModalFooter").append(`<button type="button" id="writeToUserBut" class="btn btn-primary">Write to ${user.username}</button>`);
 			$("#writeToUserBut").on("click", function(){
-				createGroup(`${user.username}_${usernameOfCurrentUser}`, null, [user.username, usernameOfCurrentUser], "PRIVATE")
+				$.get("/chat/"+user.username)
+				.done(() =>  {
+					createGroup(`${user.username}_${usernameOfCurrentUser}`, null, [user.username, usernameOfCurrentUser], "PRIVATE")
+					$("#profileModal").modal("hide");
+				})
+				.fail((resp) =>  {
+					showMessage(resp.responseJSON.message,"error-message");
+				})
 			})
 		}
 	})
 	.fail((fail) =>  {
-		showMessage(fail.responseJSON.message, "error-message")
+		showMessage(fail.responseJSON.message, "error-message");
 	})
 }
 

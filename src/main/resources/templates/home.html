@@ -23,12 +23,12 @@
 		<div class="row h-100">
 			<div class="col-3 sidebar">
 				<div class="mb-3" id="searchUsersContainer">
-					<div class="d-inline">
+					<div class="d-flex align-items-center">
 						<input type="text" id="searchUsers"
-						class="form-control search-input" placeholder="Search users">
-						<a class="deleteBut d-none" id="clearUsersDropdown">X</a>
+							class="form-control search-input" placeholder="Search users">
+						<a class="deleteBut d-none ml-2" id="clearUsersDropdown">X</a>
 					</div>
-					<div class="search-dropdown" id="searchDropdown"></div>	
+					<div class="search-dropdown" id="searchDropdown"></div>
 				</div>
 				<h4>Groups</h4>
 				<div id="group-container"></div>
@@ -96,8 +96,9 @@
 			</div>
 		</div>
 	</div>
-	
-	<div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
+
+	<div class="modal fade" id="profileModal" tabindex="-1"
+		aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content bg-dark text-white">
 				<div class="modal-header text-center">
@@ -109,20 +110,20 @@
 				</div>
 				<div class="modal-body">
 					<div class="form-group text-center">
-						<img alt="Image" src="https://via.placeholder.com/40" class="rounded-circle" style="width: 100px">
+						<img alt="Image" src="https://via.placeholder.com/40"
+							class="rounded-circle" style="width: 100px">
 					</div>
-					<div class="form-group"> 
-						<label for="profileUsername">Username:</label>
-						<input type="text" class="form-control" name="username" id="profileUsername">
+					<div class="form-group">
+						<label for="profileUsername">Username:</label> <input type="text"
+							class="form-control" name="username" id="profileUsername">
 					</div>
 					<div class="form-group">
 						<label for="profileDesc">Description:</label>
-						<textarea class="form-control" id="profileDesc" name="description" rows="3"></textarea>
+						<textarea class="form-control" id="profileDesc" name="description"
+							rows="3"></textarea>
 					</div>
 				</div>
-				<div class="modal-footer" id="profileModalFooter">
-					
-				</div>
+				<div class="modal-footer" id="profileModalFooter"></div>
 			</div>
 		</div>
 	</div>

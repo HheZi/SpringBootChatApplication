@@ -31,5 +31,5 @@ public interface ChatRepository extends MongoRepository<Chat, String>{
 	})
 	List<Chat> findByUsersNameWithLastMessage(String usersName);
 	
-	
+	public boolean existsByChatNameIn(String[] chatName);
 }

@@ -30,43 +30,40 @@ public class ChatService {
 
 	@Autowired
 	private ChatRepository chatRepository;
-	
+
 	@Autowired
 	private MessageRepository messageRepository;
-	
+
 	@Autowired
 	private ChatMapper chatMapper;
-	
+
 	@Autowired
 	private MessageMapper messageMapper;
-	
-	@Transactional	
+
+	@Transactional
 	public ChatReadDTO createGroup(ChatWriteDTO dto) {
 		return chatMapper.groupToReadDto(chatRepository.save(chatMapper.writeDtoToGroup(dto)));
 	}
-	
+
 	@Transactional
 	public MessageReadDTO saveMessageAndReturnDto(MessageWriteDTO message) {
-		return messageMapper.messageToReadDto(messageRepository
-				.save(messageMapper.writeDtoToMessage(message)));
+		return messageMapper.messageToReadDto(messageRepository.save(messageMapper.writeDtoToMessage(message)));
 	}
 
 	@Transactional(readOnly = true)
 	public List<ChatReadDTO> getAllGroupsByUsername(String username) {
-		return chatRepository
-				.findByUsersNameWithLastMessage(username)
-				.stream()
-				.map(chatMapper::groupToReadDto)
-				.toList();
-	}
-	
-	@Transactional(readOnly = true)
-	public List<MessageReadDTO> findMessagesByGroupName(String chatName) {
-		return messageRepository
-				.findByChatName(chatName)
-				.stream()
-				.map(messageMapper::messageToReadDto)
+		return chatRepository.findByUsersNameWithLastMessage(username).stream().map(chatMapper::groupToReadDto)
 				.toList();
 	}
 
+	@Transactional(readOnly = true)
+	public List<MessageReadDTO> findMessagesByGroupName(String chatName) {
+		return messageRepository.findByChatName(chatName).stream().map(messageMapper::messageToReadDto).toList();
+	}
+
+	@Transactional(readOnly = true)
+	public Boolean isPrivatChatExists(String firstUser, String secondUser) {
+		return chatRepository.existsByChatNameIn(new String[] { String.format("%s_%s", firstUser, secondUser),
+				String.format("%s_%s", secondUser, firstUser) });
+	}
 }

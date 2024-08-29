@@ -18,6 +18,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,40 +34,46 @@ import com.chat_app.service.ChatService;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@Slf4j
 public class ChatController {
-	
+
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
-	
+
 	@Autowired
 	private ChatService service;
 
 	@GetMapping("/chat/groups")
-	public List<ChatReadDTO> getAllGroups(Principal principal){
+	public List<ChatReadDTO> getAllGroups(Principal principal) {
 		return service.getAllGroupsByUsername(principal.getName());
 	}
-	
-	@MessageMapping("/group/creation")
+
+	@MessageMapping("/chat/creation")
 	public ResponseEntity<?> createGroup(@Payload ChatWriteDTO group) {
 		ChatReadDTO dto = service.createGroup(group);
-		dto.getUsersInGroup()
-		.forEach(t -> {
-			messagingTemplate.convertAndSendToUser(t, "/group/creation", dto);
+		dto.getUsersInGroup().forEach(t -> {
+			messagingTemplate.convertAndSendToUser(t, "/chat/creation", dto);
 		});
 		return status(HttpStatus.CREATED).build();
 	}
-	
+
+	@GetMapping("/chat/{user}")
+	public ResponseEntity<?> isPrivatChatExists(@PathVariable("user") String nameOfUser, Principal principal) {
+		if (!service.isPrivatChatExists(principal.getName(), nameOfUser)) {
+			return ResponseEntity.ok().build();
+		}
+		else {
+			throw new ErrorAPIException(HttpStatus.CONFLICT, "The group already exists");
+		}
+	}
+
 	@GetMapping("/chat/messages")
-	public List<MessageReadDTO> getMessages(
-				@RequestParam(name = "groupName") String groupName
-			) {
+	public List<MessageReadDTO> getMessages(@RequestParam(name = "groupName") String groupName) {
 		return service.findMessagesByGroupName(groupName);
 	}
-	
+
 	@MessageMapping("/messages/{groupName}")
 	@SendTo("/messages/{groupName}")
-	public MessageReadDTO sendMessages(@Payload  MessageWriteDTO message) {
+	public MessageReadDTO sendMessages(@Payload MessageWriteDTO message) {
 		return service.saveMessageAndReturnDto(message);
 	}
 }
