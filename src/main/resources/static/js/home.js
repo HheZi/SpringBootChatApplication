@@ -1,13 +1,13 @@
 let stompClient;
 let usernameOfCurrentUser;
 let currentGroupSocketUrl;
-let currentGroupName;
+let currentChatName;
 let usersInGroups = [];
 
 function onMessageReceived(resp){
 	const message = JSON.parse(resp.body);
-	var tag = $(`#${message.groupName.replaceAll(" ", "_")} .last-message`);
-	if(message.groupName === currentGroupName){
+	var tag = $(`#${message.chatName.replaceAll(" ", "_")} .last-message`);
+	if(message.chatName === currentChatName){
 		displayMessage(message);	
 		tag.text(`${message.sender}: ${message.content}`)
 	}
@@ -15,7 +15,7 @@ function onMessageReceived(resp){
 		tag.text("");
 		tag.append(`${message.sender}: ${message.content} <span class="badge badge-pill badge-light float-right">!</span>`);
 	}
-	$("#group-container").prepend($(`#${message.groupName.replaceAll(" ", "_")}`)).prependTo($("#group-container"));
+	$("#group-container").prepend($(`#${message.chatName.replaceAll(" ", "_")}`)).prependTo($("#group-container"));
 }
 
 function onGroupReceived(resp){
@@ -47,7 +47,7 @@ function onConnected(){
 
 function createGroup(groupName, description, usersInGroups, chatType){
 	stompClient.send("/app/group/creation", {}, JSON.stringify({
-		'groupName': groupName,
+		'chatName': groupName,
 		'description': description,
 		'usersName': usersInGroups,
 		'chatType': chatType
@@ -70,12 +70,12 @@ function displayMessage(message){
 function displayChat(chat){
 	let groupName;
 	if(chat.chatType === 'PRIVATE'){
-		groupName = chat.groupName.split("_")
+		groupName = chat.chatName.split("_")
 		.find((userName) => userName !== usernameOfCurrentUser)
 	}
 	else
-		groupName = chat.groupName;
-	const row = `<div class="group-item" onclick="getChat('${groupName}', 
+		groupName = chat.chatName;
+	const row = `<div class="group-item" onclick="getChat('${chat.chatName}', 
 		        '${chat.groupSocketUrl}')" id="${groupName.replaceAll(" ", "_")}">
 		                   <img src="https://via.placeholder.com/40" alt="Group Icon">
 		                   <div class="group-details">
@@ -89,7 +89,7 @@ function displayChat(chat){
 
 
 function getChat(groupName, groupSocketUrl){
-	if(groupName === currentGroupName)
+	if(groupName === currentChatName)
 		return;
 	
 	$(`#${groupName.replaceAll(" ", "_")} .badge`).remove();
@@ -97,7 +97,7 @@ function getChat(groupName, groupSocketUrl){
 	$(".chat-body").text("");
 	$("#sendBut").prop('disabled', false);
 	$("#sendInput").prop('disabled', false);
-	[currentGroupSocketUrl, currentGroupName] = [groupSocketUrl, groupName];
+	[currentGroupSocketUrl, currentChatName] = [groupSocketUrl, groupName];
 	$("#chatName").text(groupName);
 
 	$.get(`chat/messages?groupName=${groupName}`)
@@ -203,7 +203,7 @@ $(document).ready(function () {
     const message = {
 		content: $("#sendInput").val(),
 		sender: usernameOfCurrentUser,
-		groupName: currentGroupName
+		chatName: currentChatName
 	}
 	stompClient.send("/app" + currentGroupSocketUrl, {}, JSON.stringify(message))
 	$("#sendInput").val("");

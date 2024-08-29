@@ -28,7 +28,7 @@ public class Message {
 
 	private String sender;
 	
-	private String groupName;
+	private String chatName;
 	
 	private Instant timestamp;
 	

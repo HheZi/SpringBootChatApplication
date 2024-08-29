@@ -15,9 +15,9 @@ import java.util.Optional;
 @Repository
 public interface MessageRepository extends MongoRepository<Message, String>{
 	
-	List<Message> findByGroupName(String groupName);
+	List<Message> findByChatName(String groupName);
 	
-	@Query(value = "{groupName: ?0}", sort = "{timestamp: -1}")
+	@Query(value = "{chatName: ?0}", sort = "{timestamp: -1}")
 	Optional<Message> findLastMessageByTimestamp(String groupName);
 
 }

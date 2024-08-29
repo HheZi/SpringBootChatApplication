@@ -20,29 +20,29 @@ import com.chat_app.model.projection.ChatReadDTO;
 import com.chat_app.model.projection.ChatWriteDTO;
 import com.chat_app.model.projection.MessageReadDTO;
 import com.chat_app.model.projection.MessageWriteDTO;
-import com.chat_app.repository.GroupRepository;
+import com.chat_app.repository.ChatRepository;
 import com.chat_app.repository.MessageRepository;
-import com.chat_app.service.mapper.GroupMapper;
+import com.chat_app.service.mapper.ChatMapper;
 import com.chat_app.service.mapper.MessageMapper;
 
 @Service
 public class ChatService {
 
 	@Autowired
-	private GroupRepository groupRepository;
+	private ChatRepository chatRepository;
 	
 	@Autowired
 	private MessageRepository messageRepository;
 	
 	@Autowired
-	private GroupMapper groupMapper;
+	private ChatMapper chatMapper;
 	
 	@Autowired
 	private MessageMapper messageMapper;
 	
 	@Transactional	
 	public ChatReadDTO createGroup(ChatWriteDTO dto) {
-		return groupMapper.groupToReadDto(groupRepository.save(groupMapper.writeDtoToGroup(dto)));
+		return chatMapper.groupToReadDto(chatRepository.save(chatMapper.writeDtoToGroup(dto)));
 	}
 	
 	@Transactional
@@ -53,17 +53,17 @@ public class ChatService {
 
 	@Transactional(readOnly = true)
 	public List<ChatReadDTO> getAllGroupsByUsername(String username) {
-		return groupRepository
+		return chatRepository
 				.findByUsersNameWithLastMessage(username)
 				.stream()
-				.map(groupMapper::groupToReadDto)
+				.map(chatMapper::groupToReadDto)
 				.toList();
 	}
 	
 	@Transactional(readOnly = true)
-	public List<MessageReadDTO> findMessagesByGroupName(String groupName) {
+	public List<MessageReadDTO> findMessagesByGroupName(String chatName) {
 		return messageRepository
-				.findByGroupName(groupName)
+				.findByChatName(chatName)
 				.stream()
 				.map(messageMapper::messageToReadDto)
 				.toList();

@@ -16,7 +16,7 @@ public class MessageMapper{
 	public Message writeDtoToMessage(MessageWriteDTO dto) {
 		return Message.builder()
 				.content(dto.getContent())
-				.groupName(dto.getGroupName())
+				.chatName(dto.getChatName())
 				.sender(dto.getSender())
 				.timestamp(Instant.now())
 				.build();
@@ -24,7 +24,7 @@ public class MessageMapper{
 
 	public MessageReadDTO messageToReadDto(Message entity) {
 		return MessageReadDTO.builder()
-				.groupName(entity.getGroupName())
+				.chatName(entity.getChatName())
 				.content(entity.getContent())
 				.timestamp(entity.getTimestamp())
 				.sender(entity.getSender())

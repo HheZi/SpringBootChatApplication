@@ -25,7 +25,7 @@ public class Chat {
 	@Id
 	private String id;
 	
-	private String groupName;
+	private String chatName;
 	
 	private List<String> usersName;
 	

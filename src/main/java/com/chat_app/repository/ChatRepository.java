@@ -14,14 +14,14 @@ import com.chat_app.model.Chat;
 import com.chat_app.model.projection.ChatReadDTO;
 
 @Repository
-public interface GroupRepository extends MongoRepository<Chat, String>{
+public interface ChatRepository extends MongoRepository<Chat, String>{
 
 	@Aggregation(pipeline = {
 			"{$match: {usersName: ?0}}",
 			"{$lookup: {"
 			+ "from: 'message',"
-			+ "localField: 'groupName',"
-			+ "foreignField: 'groupName',"
+			+ "localField: 'chatName',"
+			+ "foreignField: 'chatName',"
 			+ "as: 'lastMessage',"
 			+ "pipeline: ["
 			+ "{$sort: {timestamp: -1}},"

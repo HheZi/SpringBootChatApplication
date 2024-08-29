@@ -17,6 +17,6 @@ public class MessageWriteDTO {
 	private String sender;
 	
 	@NotBlank(message = "Group name must not be blank")
-	private String groupName;
+	private String chatName;
 	
 }

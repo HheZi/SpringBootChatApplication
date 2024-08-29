@@ -5,6 +5,7 @@ import java.util.List;
 import com.chat_app.model.enums.ChatType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.mongodb.lang.Nullable;
 
 import jakarta.validation.constraints.NotBlank;
@@ -26,7 +27,7 @@ import lombok.ToString;
 public class ChatWriteDTO {
 	
 	@NotBlank
-	private String groupName;
+	private String chatName;
 	
 	@NotEmpty(message = "At least one user need to be in group")
 	private String[] usersName;
@@ -34,6 +35,7 @@ public class ChatWriteDTO {
 	@Nullable
 	private String description;
 	
+	@JsonFormat(shape = Shape.OBJECT)
 	@NotNull(message = "Chat type is required")
 	private ChatType chatType;
 }

@@ -16,7 +16,7 @@ public class MessageReadDTO {
 
 	private String sender;
 	
-	private String groupName;
+	private String chatName;
 	
 	@JsonFormat(pattern = "HH:mm", timezone = "UTC",  shape = Shape.STRING)
 	private Instant timestamp;
