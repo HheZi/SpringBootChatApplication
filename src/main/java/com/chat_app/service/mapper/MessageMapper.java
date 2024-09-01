@@ -13,26 +13,26 @@ import com.chat_app.model.projection.MessageWriteDTO;
 @Service
 public class MessageMapper{
 
-	public Message writeDtoToMessage(MessageWriteDTO dto) {
+	public Message writeDtoToMessage(MessageWriteDTO dto, Integer senderId) {
 		return Message.builder()
 				.content(dto.getContent())
-				.chatName(dto.getChatName())
-				.sender(dto.getSender())
+				.chatId(dto.getChatName())
+				.senderId(senderId)
 				.timestamp(Instant.now())
 				.build();
 	}
 
-	public MessageReadDTO messageToReadDto(Message entity) {
+	public MessageReadDTO messageToReadDto(Message entity, String chatName, String sender) {
 		return MessageReadDTO.builder()
-				.chatName(entity.getChatName())
+				.chatName(chatName)
 				.content(entity.getContent())
 				.timestamp(entity.getTimestamp())
-				.sender(entity.getSender())
+				.sender(sender)
 				.build();
 	}
 	
 	public String mapToSendeAndContentString(Optional<Message> message) {
-		return message.map(t -> String.format("%s: %s", t.getSender(), t.getContent()))
+		return message.map(t -> String.format("%s: %s", t.getSenderId(), t.getContent()))
 				.orElse("");
 	}
 }

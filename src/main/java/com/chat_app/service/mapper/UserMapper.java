@@ -24,6 +24,7 @@ public class UserMapper {
 				.email(user.getEmail())
 				.username(user.getUsername())
 				.status(user.getStatus())
+				.description(user.getDescription())
 				.avatarUrl(user.getAvatar().isEmpty() ? "" : user.getAvatar())
 				.build();
 	}

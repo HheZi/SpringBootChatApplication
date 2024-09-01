@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.chat_app.exception.ErrorAPIException;
 import com.chat_app.model.User;
 import com.chat_app.model.enums.Status;
+import com.chat_app.model.projection.UpdateUserDTO;
 import com.chat_app.model.projection.UserReadDTO;
 import com.chat_app.model.projection.UserWriteDTO;
 import com.chat_app.repository.UserReposiory;
@@ -40,10 +41,36 @@ public class UserService implements UserDetailsService{
 				.orElseThrow((() -> new UsernameNotFoundException("User is not found")));
 	}
 	
+	public List<UserReadDTO> getUserById(List<Integer> id) {
+		return userReposiory.findAllById(id)
+				.stream()
+				.map(userMapper::userToReadDTO)
+				.toList();
+	}
+	
+	public void updateUserByUsername(String username, UpdateUserDTO dto) {
+		User user = userReposiory.findByUsername(username)
+		.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "The user is not found"));
+		
+//		user.setAvatar(dto.getAvatar().get);
+		user.setDescription(dto.getDescription());
+		user.setUsername(dto.getUsername());
+		
+		userReposiory.save(user);
+	}
+	
 	public UserReadDTO getUserByUsername(String username) {
 		return userReposiory.findByUsername(username)
 				.map(userMapper::userToReadDTO)
 				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "The user is not found"));
+	}
+	
+	public List<Integer> getUserIdByUsername(List<String> usernames) {
+		return userReposiory
+				.getByUsernameIn(usernames)
+				.stream()
+				.map(t -> t.getId())
+				.toList();
 	}
 	
 	@Transactional(readOnly = true)	
@@ -53,6 +80,13 @@ public class UserService implements UserDetailsService{
 				.stream()
 				.map(userMapper::userToReadDTO)
 				.toList();
+	}
+	
+	public Integer getIdByUsername(String username) {
+		return userReposiory
+				.findByUsername(username)
+				.map(t -> t.getId())
+				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "The user is not found"));
 	}
 	
 	@Transactional

@@ -14,5 +14,7 @@ import java.util.Optional;
 public interface UserReposiory extends CrudRepository<User, Integer>, ListCrudRepository<User, Integer>{
 	public Optional<User> findByUsername(String username);
 	
+	public List<User> getByUsernameIn(List<String> usernames);
+	
 	public List<User> findByUsernameIsStartingWithIgnoreCase(String username, Limit limit);
 }

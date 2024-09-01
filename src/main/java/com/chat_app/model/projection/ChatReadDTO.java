@@ -6,10 +6,17 @@ import com.chat_app.model.enums.ChatType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.Value;
 
-@Value
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Setter
 @Builder
 public class ChatReadDTO {
 	
@@ -20,7 +27,7 @@ public class ChatReadDTO {
 	@Builder.Default
 	private String lastMessage = "";
 	
-	private List<String> usersInGroup;
+	private List<Integer> usersInGroup;
 	
 	@JsonFormat(shape = Shape.STRING)
 	private ChatType chatType;

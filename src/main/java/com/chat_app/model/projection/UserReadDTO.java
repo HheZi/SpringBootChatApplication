@@ -18,5 +18,7 @@ public class UserReadDTO {
 	@JsonFormat(shape = Shape.STRING)
 	private Status status;
 
+	private String description;
+	
 	private String avatarUrl;
 }

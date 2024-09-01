@@ -20,10 +20,10 @@ public class ChatMapper {
 	
 	private final String LAST_MESSAGE_FORMAT = "%s: %s";
 
-	public Chat writeDtoToGroup(ChatWriteDTO dto) {
+	public Chat writeDtoToGroup(ChatWriteDTO dto, List<Integer> usersId) {
 		return Chat.builder()
 				.chatName(dto.getChatName())
-				.usersName(List.of(dto.getUsersName()))
+				.usersId(usersId)
 				.chatType(dto.getChatType())
 				.build();
 	}
@@ -33,9 +33,9 @@ public class ChatMapper {
 				.chatName(entity.getChatName())
 				.groupSocketUrl(String.format(SOCKET_URL_PATTERN, entity.getId().substring(0,15)))
 				.lastMessage(entity.getLastMessage() == null || entity.getLastMessage().isEmpty() 
-							?  "" : String.format(LAST_MESSAGE_FORMAT, entity.getLastMessage().get(0).getSender(),
+							?  "" : String.format(LAST_MESSAGE_FORMAT, entity.getLastMessage().get(0).getSenderId(),
 							entity.getLastMessage().get(0).getContent()))
-				.usersInGroup(entity.getUsersName())
+				.usersInGroup(entity.getUsersId())
 				.chatType(entity.getChatType())
 				.build();
 	}

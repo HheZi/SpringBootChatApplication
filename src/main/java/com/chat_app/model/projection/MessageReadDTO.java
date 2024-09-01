@@ -12,12 +12,12 @@ import lombok.Value;
 @Builder
 public class MessageReadDTO {
 
+	private String chatName;
+	
 	private String content;
 
 	private String sender;
 	
-	private String chatName;
-	
-	@JsonFormat(pattern = "HH:mm", timezone = "UTC",  shape = Shape.STRING)
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "UTC",  shape = Shape.STRING)
 	private Instant timestamp;
 }

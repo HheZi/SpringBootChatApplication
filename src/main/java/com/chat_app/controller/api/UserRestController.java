@@ -1,33 +1,30 @@
 package com.chat_app.controller.api;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.chat_app.exception.ErrorAPIException;
-import com.chat_app.model.User;
+import com.chat_app.model.projection.UpdateUserDTO;
 import com.chat_app.model.projection.UserReadDTO;
 import com.chat_app.model.projection.UserWriteDTO;
 import com.chat_app.service.UserService;
+
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/users")
@@ -56,14 +53,24 @@ public class UserRestController {
 		return userService.getUserByUsername(username);
 	}
 	
+	
 	@GetMapping("/auth")
-	public String getAuthUsername(@AuthenticationPrincipal UserDetails userDetails) {
-		return userDetails.getUsername();
+	public String getAuthUsername(Principal principal) {
+		return principal.getName();
 	}
 	
 	@GetMapping
 	public List<UserReadDTO> UsersByUsername(@RequestParam(name = "username") String username) {
 		return userService.getUsersByUsername(username);
+	}
+	
+	@PutMapping("/{username}")
+	public ResponseEntity<?> updateUser( @RequestBody @Validated  UpdateUserDTO dto, BindingResult rs, @PathVariable("username") String username) {
+		if (rs.hasErrors()) {
+			throw new ErrorAPIException(HttpStatus.NOT_ACCEPTABLE, rs.getFieldError().getDefaultMessage());
+		}
+		userService.updateUserByUsername(username, dto);
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 	
 	@PostMapping("/new")

@@ -26,11 +26,11 @@ import lombok.ToString;
 @ToString
 public class ChatWriteDTO {
 	
-	@NotBlank
+	@Nullable
 	private String chatName;
 	
 	@NotEmpty(message = "At least one user need to be in group")
-	private String[] usersName;
+	private List<String> usersName;
 	
 	@Nullable
 	private String description;

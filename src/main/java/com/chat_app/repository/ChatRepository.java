@@ -1,6 +1,7 @@
 package com.chat_app.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Limit;
 import org.springframework.data.mongodb.repository.Aggregation;
@@ -17,11 +18,11 @@ import com.chat_app.model.projection.ChatReadDTO;
 public interface ChatRepository extends MongoRepository<Chat, String>{
 
 	@Aggregation(pipeline = {
-			"{$match: {usersName: ?0}}",
+			"{$match: {usersId: ?0}}",
 			"{$lookup: {"
 			+ "from: 'message',"
-			+ "localField: 'chatName',"
-			+ "foreignField: 'chatName',"
+			+ "localField: '_id',"
+			+ "foreignField: 'chatId',"
 			+ "as: 'lastMessage',"
 			+ "pipeline: ["
 			+ "{$sort: {timestamp: -1}},"
@@ -29,7 +30,9 @@ public interface ChatRepository extends MongoRepository<Chat, String>{
 			+ "]}}",
 			"{$sort: {'lastMessage.timestamp': -1}}"
 	})
-	List<Chat> findByUsersNameWithLastMessage(String usersName);
+	List<Chat> findByUsersIdWithLastMessage(Integer usersId);
 	
 	public boolean existsByChatNameIn(String[] chatName);
+	
+	public Optional<Chat> findByChatName(String chatName);
 }

@@ -26,9 +26,9 @@ public class Message {
 
 	private String content;
 
-	private String sender;
+	private Integer senderId;
 	
-	private String chatName;
+	private String chatId;
 	
 	private Instant timestamp;
 	

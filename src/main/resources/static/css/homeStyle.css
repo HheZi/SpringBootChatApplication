@@ -133,3 +133,8 @@ body {
 	text-decoration: none;
 	cursor: pointer;
 }
+
+#usernameProfileContainer:hover {
+	background-color: #703f8d;
+	cursor: pointer;
+}

@@ -34,6 +34,7 @@ function onConnected(){
 		usernameOfCurrentUser = usernameResp;
 		stompClient.subscribe("/user/chat/creation", onGroupReceived)
 		$("#username").text(usernameResp);
+		$("#usernameProfileContainer").on('click', () => getInfoAboutUser(usernameOfCurrentUser))
 		
 		$.get(`/chat/groups`)
 	    .then((data) => {
@@ -104,7 +105,7 @@ function getChat(groupName, chatType, groupSocketUrl){
 	$("#chatName").text(calculateChatName(groupName, chatType));
 	[currentChatName, currentGroupSocketUrl] = [groupName, groupSocketUrl];
 
-	$.get(`chat/messages?groupName=${groupName}`)
+	$.get(`chat/messages/${groupName}`)
 	.done((data) =>{
 		data.forEach((message) => {
 			displayMessage(message)
@@ -136,7 +137,7 @@ function searchUsers(e, dropdownClass, inputClass, inModal = false){
 			})
             .fail(function(fail) {
                 if (fail.status >= 400 && fail.status < 500) {
-					showMessage(jqXHR.responseJSON.message, "error-message")
+					showMessage(jqXHR.responseJSON.message || "Something went wrong", "error-message")
                 } else {
 					showMessage("An unexpected error occurred. Please try again later.", "error-message")
                 }
@@ -183,7 +184,25 @@ function getInfoAboutUser(username){
 			$("#profileUsername").removeClass("text-dark");
 			$('#profileDesc').attr('readonly', false);
 			$('#profileUsername').attr('readonly', false);
-			$("#profileModalFooter").append(`<button type="button" class="btn btn-primary">Save changes</button>`);		
+			$("#profileModalFooter").append(`<button type="button" id="saveUserProfile" class="btn btn-primary">Save changes</button>`);
+			$("#saveUserProfile").on('click', function(){
+				$.ajax({
+				    url: '/api/users/'+usernameOfCurrentUser,
+				    type: 'PUT',
+					contentType: "application/json",
+				    data: JSON.stringify({
+						username: $("#profileUsername").val(),
+						description: $("#profileDesc").val()
+					}),
+				    dataType: "json",
+				    success: function() {
+				        showMessage("You update a profile", "success-messagew")
+				    },
+				    error: function(resp) {
+						showMessage(resp.responseJSON.message, "error-message")
+			        }
+				});
+			})		
 		}
 		else{
 			$("#profileModalFooter").append(`<button type="button" id="writeToUserBut" class="btn btn-primary">Write to ${user.username}</button>`);
@@ -194,13 +213,13 @@ function getInfoAboutUser(username){
 					$("#profileModal").modal("hide");
 				})
 				.fail((resp) =>  {
-					showMessage(resp.responseJSON.message,"error-message");
+					showMessage(resp.responseJSON.message, "error-message");
 				})
 			})
 		}
 	})
 	.fail((fail) =>  {
-		showMessage(fail.responseJSON.message, "error-message");
+		showMessage(fail.responseJSON.message || "Something went wrong", "error-message");
 	})
 }
 
@@ -221,7 +240,7 @@ $(document).ready(function () {
 	});
 	
 	$("#searchUsers").on("keypress",(e) => searchUsers(e, ".search-dropdown", "#searchUsers", false))
-	
+		
 	$("#clearUsersDropdown").on("click", function(){
 		$("#searchDropdown").text("");
 		$(this).addClass("d-none");
