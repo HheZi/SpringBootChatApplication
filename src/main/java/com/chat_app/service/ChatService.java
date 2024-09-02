@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,26 +55,31 @@ public class ChatService {
 		return chatRepository.findByUsersIdWithLastMessage(usernameId);
 	}
 	
-	public Chat findChatByChatName(String chatName) {
-		return chatRepository.findByChatName(chatName)
-				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "The user is not found"));
-	}
-
 	@Transactional(readOnly = true)
 	public List<Message> findMessagesByChatId(String chatId) {
 		return messageRepository.findByChatId(chatId);
 	}
 
+	public Chat findChatById(String chatId) {
+		return chatRepository.findById(chatId)
+				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "Chat is not found!"));
+	}
+	
 	@Transactional(readOnly = true)
-	public String findIdOfChatByChatName(String chatName) {
+	public String findChatByChatName(String chatName) {
 		return chatRepository.findByChatName(chatName)
 				.map(t -> t.getId())
 				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "Chat is not found!"));
 	}
 	
 	@Transactional(readOnly = true)
-	public Boolean isPrivatChatExists(Integer firstUserId, Integer secondUserId) {
-		return chatRepository.existsByChatNameIn(new String[] { String.format("%d_%d", firstUserId, secondUserId),
+	public void isPrivateChatExists(Integer firstUserId, Integer secondUserId) {
+		boolean b = chatRepository.existsByChatNameIn(new String[] { String.format("%d_%d", firstUserId, secondUserId),
 				String.format("%d_%d", secondUserId, firstUserId) });
+		if (b) {
+			throw new ErrorAPIException(HttpStatus.CONFLICT, "The group already exists");
+		}
+		
 	}
+	
 }

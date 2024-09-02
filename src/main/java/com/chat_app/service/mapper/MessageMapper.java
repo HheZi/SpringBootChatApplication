@@ -26,8 +26,8 @@ public class MessageMapper{
 
 	public MessageReadDTO messageToReadDto(Message entity, List<User> userId, String chatName) {
 		String username = userId.stream()
-		.filter(u -> u.getId() != entity.getSenderId())
-		.findAny().get().getUsername();
+		.filter(u -> u.getId() == entity.getSenderId())
+		.findFirst().get().getUsername();
 		return messageToReadDto(entity, username, chatName);
 	}
 	

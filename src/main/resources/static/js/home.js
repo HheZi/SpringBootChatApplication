@@ -79,9 +79,8 @@ function calculateChatName(chatName, chatType){
 
 function displayChat(chat){
 	let groupName = calculateChatName(chat.chatName, chat.chatType);
-	
 	const row = `<div class="group-item" onclick="getChat('${chat.chatName}', '${chat.chatType}', '${chat.groupSocketUrl}', 
-		        '${chat.groupSocketUrl}')" id="${chat.chatName.replaceAll(" ", "_")}">
+					'${chat.chatId}')" id="${chat.chatName.replaceAll(" ", "_")}">
 		                   <img src="https://via.placeholder.com/40" alt="Group Icon">
 		                   <div class="group-details">
 		                       <div class="group-name">${groupName}</div>
@@ -93,10 +92,10 @@ function displayChat(chat){
 }
 
 
-function getChat(groupName, chatType, groupSocketUrl){
+function getChat(groupName, chatType, groupSocketUrl, chatId){
 	if(groupName === currentChatName)
 		return;
-	
+		
 	$(`#${groupName.replaceAll(" ", "_")} .badge`).remove();
 	$("#sendInput").val("");
 	$(".chat-body").text("");
@@ -105,8 +104,7 @@ function getChat(groupName, chatType, groupSocketUrl){
 	$("#chatName").text(calculateChatName(groupName, chatType));
 	[currentChatName, currentGroupSocketUrl] = [groupName, groupSocketUrl];
 	
-	console.log(groupName)
-	$.get(`chat/messages/${groupName}`)
+	$.get(`chat/messages/${chatId}`)
 	.done((data) =>{
 		data.forEach((message) => {
 			displayMessage(message)

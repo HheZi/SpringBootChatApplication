@@ -50,40 +50,40 @@ public class UserRestController {
 //		userService.makeUserOffline(user);
 //		return user;
 //	}
-	
+
 	@GetMapping("/{username}")
 	public UserReadDTO getUser(@PathVariable("username") String username) {
 		return userService.getUserByUsername(username);
 	}
-	
-	
+
 	@GetMapping("/auth")
 	public String getAuthUsername(@AuthenticationPrincipal User user) {
 		return user.getUsername();
 	}
-	
+
 	@GetMapping
 	public List<UserReadDTO> UsersByUsername(@RequestParam(name = "username") String username) {
 		return userService.getUsersByUsername(username);
 	}
-	
+
 	@PutMapping("/{username}")
-	public ResponseEntity<?> updateUser( @RequestBody @Validated UpdateUserDTO dto, BindingResult rs, @PathVariable("username") String username) {
+	public ResponseEntity<?> updateUser(@RequestBody @Validated UpdateUserDTO dto, BindingResult rs,
+			@PathVariable("username") String username, @AuthenticationPrincipal User user) {
 		if (rs.hasErrors()) {
 			throw new ErrorAPIException(HttpStatus.NOT_ACCEPTABLE, rs.getFieldError().getDefaultMessage());
 		}
-		userService.updateUserByUsername(username, dto);
+		userService.updateUserByUsername(username, dto, user);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
-	
+
 	@PostMapping("/new")
-	public ResponseEntity<?> registerUser(@ModelAttribute @Validated UserWriteDTO dto, BindingResult rs){	
+	public ResponseEntity<?> registerUser(@ModelAttribute @Validated UserWriteDTO dto, BindingResult rs) {
 		if (rs.hasErrors()) {
 			throw new ErrorAPIException(HttpStatus.NOT_ACCEPTABLE, rs.getFieldError().getDefaultMessage());
 		}
 		userService.saveUser(dto);
-		
+
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
-	
+
 }

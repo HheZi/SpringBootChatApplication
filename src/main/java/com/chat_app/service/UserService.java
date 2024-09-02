@@ -48,15 +48,22 @@ public class UserService implements UserDetailsService{
 	}
 	
 	@Transactional
-	public void updateUserByUsername(String username, UpdateUserDTO dto) {
+	public void updateUserByUsername(String username, UpdateUserDTO dto, User authUser) {
 		User user = userReposiory.findByUsername(username)
 		.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "The user is not found"));
+		
+		updateUserWithDTO(user, dto);
+		updateUserWithDTO(authUser, dto);
+		
+		userReposiory.save(user);
+	}
+	
+	public void updateUserWithDTO(User user, UpdateUserDTO dto) {
 		
 //		user.setAvatar(dto.getAvatar().get);
 		user.setDescription(dto.getDescription());
 		user.setUsername(dto.getUsername());
 		
-		userReposiory.save(user);
 	}
 	
 	@Transactional(readOnly = true)	
@@ -109,10 +116,4 @@ public class UserService implements UserDetailsService{
 		userReposiory.save(user);
 	}
 	
-	public boolean isUsernameIsTheSameAsAuth(String username) {
-		return SecurityContextHolder.getContext()
-				.getAuthentication()
-				.getName()
-				.equals(username);	
-	}
 }

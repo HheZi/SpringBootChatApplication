@@ -3,6 +3,7 @@ package com.chat_app.service.mapper;
 import java.lang.reflect.Array;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,8 @@ public class ChatMapper {
 
 	public Chat writeDtoToGroup(ChatWriteDTO dto, List<Integer> usersId) {
 		return Chat.builder()
-				.chatName(dto.getChatName())
+				.chatName(dto.getChatType() == ChatType.PRIVATE ? 
+						usersId.stream().map(t -> t.toString()).collect(Collectors.joining("_")) : dto.getChatName())
 				.usersId(usersId)
 				.chatType(dto.getChatType())
 				.build();
@@ -31,11 +33,12 @@ public class ChatMapper {
 	public ChatReadDTO groupToReadDto(Chat entity) {
 		return ChatReadDTO.builder()
 				.chatName(entity.getChatName())
-				.groupSocketUrl(String.format(SOCKET_URL_PATTERN, entity.getId().substring(0,15)))
+				.groupSocketUrl(String.format(SOCKET_URL_PATTERN, entity.getId()))
 				.lastMessage(entity.getLastMessage() == null || entity.getLastMessage().isEmpty() 
 							?  "" : String.format(LAST_MESSAGE_FORMAT, entity.getLastMessage().get(0).getSenderId(),
 							entity.getLastMessage().get(0).getContent()))
 				.usersInGroup(entity.getUsersId())
+				.chatId(entity.getId())
 				.chatType(entity.getChatType())
 				.build();
 	}

@@ -24,6 +24,8 @@ public class ChatReadDTO {
 	
 	private String groupSocketUrl;
 	
+	private String chatId;
+	
 	@Builder.Default
 	private String lastMessage = "";
 	
