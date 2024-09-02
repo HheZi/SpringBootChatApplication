@@ -39,42 +39,29 @@ public class ChatService {
 	@Autowired
 	private MessageRepository messageRepository;
 
-	@Autowired
-	private ChatMapper chatMapper;
+	@Transactional
+	public Chat createGroup(Chat chat) {
+		return chatRepository.save(chat);
+	}
 
-	@Autowired
-	private MessageMapper messageMapper;
+	@Transactional
+	public Message saveMessage(Message message) {
+		return messageRepository.save(message);
+	}
+
+	@Transactional(readOnly = true)
+	public List<Chat> getAllGroupsByUsername(Integer usernameId) {
+		return chatRepository.findByUsersIdWithLastMessage(usernameId);
+	}
 	
-
-	@Transactional
-	public ChatReadDTO createGroup(ChatWriteDTO dto, List<Integer> usersId) {
-		return chatMapper.groupToReadDto(chatRepository.save(chatMapper.writeDtoToGroup(dto, usersId)));
-	}
-
-	@Transactional
-	public MessageReadDTO saveMessageAndReturnDto(MessageWriteDTO message, Integer userId) {
-		String chatName = message.getChatName();
-		message.setChatName(findIdOfChatByChatName(chatName));
-		return messageMapper.messageToReadDto(messageRepository
-				.save(messageMapper.writeDtoToMessage(message, userId)), chatName, message.getSender());
+	public Chat findChatByChatName(String chatName) {
+		return chatRepository.findByChatName(chatName)
+				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "The user is not found"));
 	}
 
 	@Transactional(readOnly = true)
-	public List<ChatReadDTO> getAllGroupsByUsername(Integer usernameId) {
-		return chatRepository.findByUsersIdWithLastMessage(usernameId)
-				.stream()
-				.map(chatMapper::groupToReadDto)
-				.toList();
-	}
-
-	@Transactional(readOnly = true)
-	public List<MessageReadDTO> findMessagesByGroupName(String chatName) {
-		return messageRepository.findByChatId(chatRepository.findByChatName(chatName)
-					.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "The chat is not found"))
-					.getId())
-				.stream()
-				.map(t -> messageMapper.messageToReadDto(t, chatName))
-				.toList();
+	public List<Message> findMessagesByChatId(String chatId) {
+		return messageRepository.findByChatId(chatId);
 	}
 
 	@Transactional(readOnly = true)
@@ -85,8 +72,8 @@ public class ChatService {
 	}
 	
 	@Transactional(readOnly = true)
-	public Boolean isPrivatChatExists(String firstUser, String secondUser) {
-		return chatRepository.existsByChatNameIn(new String[] { String.format("%s_%s", firstUser, secondUser),
-				String.format("%s_%s", secondUser, firstUser) });
+	public Boolean isPrivatChatExists(Integer firstUserId, Integer secondUserId) {
+		return chatRepository.existsByChatNameIn(new String[] { String.format("%d_%d", firstUserId, secondUserId),
+				String.format("%d_%d", secondUserId, firstUserId) });
 	}
 }

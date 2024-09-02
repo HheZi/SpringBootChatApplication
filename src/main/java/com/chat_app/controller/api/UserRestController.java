@@ -3,9 +3,11 @@ package com.chat_app.controller.api;
 import java.security.Principal;
 import java.util.List;
 
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.chat_app.exception.ErrorAPIException;
+import com.chat_app.model.User;
 import com.chat_app.model.projection.UpdateUserDTO;
 import com.chat_app.model.projection.UserReadDTO;
 import com.chat_app.model.projection.UserWriteDTO;
@@ -55,8 +58,8 @@ public class UserRestController {
 	
 	
 	@GetMapping("/auth")
-	public String getAuthUsername(Principal principal) {
-		return principal.getName();
+	public String getAuthUsername(@AuthenticationPrincipal User user) {
+		return user.getUsername();
 	}
 	
 	@GetMapping
@@ -65,7 +68,7 @@ public class UserRestController {
 	}
 	
 	@PutMapping("/{username}")
-	public ResponseEntity<?> updateUser( @RequestBody @Validated  UpdateUserDTO dto, BindingResult rs, @PathVariable("username") String username) {
+	public ResponseEntity<?> updateUser( @RequestBody @Validated UpdateUserDTO dto, BindingResult rs, @PathVariable("username") String username) {
 		if (rs.hasErrors()) {
 			throw new ErrorAPIException(HttpStatus.NOT_ACCEPTABLE, rs.getFieldError().getDefaultMessage());
 		}

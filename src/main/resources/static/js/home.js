@@ -13,7 +13,7 @@ function onMessageReceived(resp){
 	}
 	else{
 		tag.text("");
-		tag.append(`${message.sender}: ${message.content} <span class="badge badge-pill badge-light float-right">!</span>`);
+		tag.append(`${message.sender}: ${message.content}<span class="badge badge-pill badge-light float-right">!</span>`);
 	}
 	$("#group-container").prepend($(`#${message.chatName.replaceAll(" ", "_")}`)).prependTo($("#group-container"));
 }
@@ -104,7 +104,8 @@ function getChat(groupName, chatType, groupSocketUrl){
 	$("#sendInput").prop('disabled', false);
 	$("#chatName").text(calculateChatName(groupName, chatType));
 	[currentChatName, currentGroupSocketUrl] = [groupName, groupSocketUrl];
-
+	
+	console.log(groupName)
 	$.get(`chat/messages/${groupName}`)
 	.done((data) =>{
 		data.forEach((message) => {
