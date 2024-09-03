@@ -19,7 +19,7 @@ import lombok.Value;
 @Builder
 public class MessageReadDTO {
 
-	private String chatName;
+	private String chatId;
 	
 	private String content;
 

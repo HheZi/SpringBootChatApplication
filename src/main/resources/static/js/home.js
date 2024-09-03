@@ -1,13 +1,13 @@
 let stompClient;
 let usernameOfCurrentUser;
 let currentGroupSocketUrl;
-let currentChatName;
+let currentChatId;
 let usersInGroups = [];
 
 function onMessageReceived(resp){
 	const message = JSON.parse(resp.body);
-	var tag = $(`#${message.chatName.replaceAll(" ", "_")} .last-message`);
-	if(message.chatName === currentChatName){
+	var tag = $(`#${message.chatId} .last-message`);
+	if(message.chatId === currentChatId){
 		displayMessage(message);	
 		tag.text(`${message.content}`)
 	}
@@ -19,7 +19,7 @@ function onMessageReceived(resp){
 		  <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.5-5v1.5a.5.5 0 0 1-1 0V11a.5.5 0 0 1 1 0m0 3a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0"/>
 		</svg>`);
 	}
-	$("#group-container").prepend($(`#${message.chatName.replaceAll(" ", "_")}`)).prependTo($("#group-container"));
+	$("#group-container").prepend($(`#${message.chatId}`)).prependTo($("#group-container"));
 }
 
 function onGroupReceived(resp){
@@ -50,12 +50,12 @@ function onConnected(){
 	
 }
 
-function createGroup(groupName, description, usersInGroups, chatType){
-	stompClient.send("/app/chat/creation", {}, JSON.stringify({
+function createGroup(url, groupName, description, usersInGroups, authUsername){
+	stompClient.send("/app" + url, {}, JSON.stringify({
 		'chatName': groupName,
 		'description': description,
 		'usersName': usersInGroups,
-		'chatType': chatType
+		 authUsername: authUsername
 	}))
 }
 
@@ -77,22 +77,12 @@ function displayMessage(message){
 	$(".chat-body").scrollTop($(".chat-body").prop('scrollHeight'));
 }
 
-function calculateChatName(chatName, chatType){
-	if(chatType === 'PRIVATE'){
-		return chatName.split("_").find((userName) => userName !== usernameOfCurrentUser);
-	}
-	else
-		return chatName;
-	
-}
-
 function displayChat(chat){
-	let groupName = calculateChatName(chat.chatName, chat.chatType);
-	const row = `<div class="group-item" onclick="getChat('${chat.chatName}', '${chat.chatType}', '${chat.groupSocketUrl}', 
-					'${chat.chatId}')" id="${chat.chatName.replaceAll(" ", "_")}">
+	const row = `<div class="group-item" onclick="getChat('${chat.chatName}', '${chat.chatId}', '${chat.groupSocketUrl}')" 
+							id="${chat.chatId}">
 		                   <img src="https://via.placeholder.com/40" alt="Group Icon">
 		                   <div class="group-details">
-		                       <div class="group-name">${groupName}</div>
+		                       <div class="group-name">${chat.chatName}</div>
 		                       <div class="last-message">${chat.lastMessage}</div>
 		                   </div>
 		               </div>`;
@@ -101,19 +91,19 @@ function displayChat(chat){
 }
 
 
-function getChat(groupName, chatType, groupSocketUrl, chatId){
-	if(groupName === currentChatName)
+function getChat(chatName, chatId, groupSocketUrl){
+	if(chatId === currentChatId)
 		return;
 		
-	$(`#${groupName.replaceAll(" ", "_")} .badge`).remove();
+	$(`#${chatId} .badge`).remove();
 	$("#sendInput").val("");
 	$(".chat-body").text("");
 	$("#sendBut").prop('disabled', false);
 	$("#sendInput").prop('disabled', false);
-	$("#chatName").text(calculateChatName(groupName, chatType));
-	[currentChatName, currentGroupSocketUrl] = [groupName, groupSocketUrl];
+	$("#chatName").text(chatName);
+	[currentChatId, currentGroupSocketUrl] = [chatId, groupSocketUrl];
 	
-	$.get(`chat/messages/${chatId}`)
+	$.get(`/chat`+groupSocketUrl)
 	.done((data) =>{
 		data.forEach((message) => {
 			displayMessage(message)
@@ -221,7 +211,7 @@ function getInfoAboutUser(username){
 			$("#writeToUserBut").on("click", function(){
 				$.get("/chat/"+user.username)
 				.done(() =>  {
-					createGroup(`${user.username}_${usernameOfCurrentUser}`, null, [user.username, usernameOfCurrentUser], "PRIVATE")
+					createGroup("/chat/creation/private", null, null, [user.username, usernameOfCurrentUser], usernameOfCurrentUser)
 					$("#profileModal").modal("hide");
 				})
 				.fail((resp) =>  {
@@ -245,7 +235,6 @@ $(document).ready(function () {
     const message = {
 		content: $("#sendInput").val(),
 		sender: usernameOfCurrentUser,
-		chatName: currentChatName
 	}
 	stompClient.send("/app" + currentGroupSocketUrl, {}, JSON.stringify(message))
 	$("#sendInput").val("");
@@ -275,7 +264,7 @@ $(document).ready(function () {
 		if(usersInGroups.length === 0){
 			 showMessage("At least one user need to be in group", "error-message")
 		}
-		createGroup($('#groupNameInput').val(), $('#groupDescriptionInput').val(), usersInGroups, "GROUP")
+		createGroup("/chat/creation/group", $('#groupNameInput').val(), $('#groupDescriptionInput').val(), usersInGroups)
 		usersInGroups = [];
 		$("#selectedUsers").text("");
 		$('#groupNameInput').val("");

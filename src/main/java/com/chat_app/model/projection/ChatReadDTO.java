@@ -29,8 +29,4 @@ public class ChatReadDTO {
 	@Builder.Default
 	private String lastMessage = "";
 	
-	private List<Integer> usersInGroup;
-	
-	@JsonFormat(shape = Shape.STRING)
-	private ChatType chatType;
 }

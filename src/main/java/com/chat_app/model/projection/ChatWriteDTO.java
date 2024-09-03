@@ -35,7 +35,5 @@ public class ChatWriteDTO {
 	@Nullable
 	private String description;
 	
-	@JsonFormat(shape = Shape.OBJECT)
-	@NotNull(message = "Chat type is required")
-	private ChatType chatType;
+	private String authUsername;
 }

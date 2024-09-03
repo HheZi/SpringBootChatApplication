@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.chat_app.model.Chat;
+import com.chat_app.model.enums.ChatType;
 import com.chat_app.model.projection.ChatReadDTO;
 
 @Repository
@@ -32,7 +33,7 @@ public interface ChatRepository extends MongoRepository<Chat, String>{
 	})
 	List<Chat> findByUsersIdWithLastMessage(Integer usersId);
 	
-	public boolean existsByChatNameIn(String[] chatName);
+	public boolean existsByChatNameInAndChatType(String[] chatName, ChatType chatType);
 	
 	public Optional<Chat> findByChatName(String chatName);
 	

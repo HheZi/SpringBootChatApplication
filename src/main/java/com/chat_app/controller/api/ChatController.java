@@ -51,39 +51,41 @@ public class ChatController {
 	private MessageMapper messageMapper;
 
 	@GetMapping("/chat/groups")
-	public List<ChatReadDTO> getAllGroups(@AuthenticationPrincipal User user) {
-		return chatService.getAllGroupsByUsername(user.getId())
-				.stream().peek(t -> {
-					if (t.getChatType() == ChatType.PRIVATE) {
-						t.setChatName(userService.getUserById(t.getUsersId()).stream().map(u -> u.getUsername())
-								.collect(Collectors.joining("_")));
-					}
-				})
+	public List<ChatReadDTO> getAllGroups(@AuthenticationPrincipal User authUser) {
+		return chatService.getAllChatsByUsername(authUser.getId())
+				.stream()
 				.map(chatMapper::groupToReadDto)
 				.toList();
 	}
 
-	@MessageMapping("/chat/creation")
-	public ResponseEntity<?> createGroup(@Payload ChatWriteDTO group) {
+	@MessageMapping("/chat/creation/group")
+	public ResponseEntity<?> createGroupChat(@Payload ChatWriteDTO group) {
 		List<Integer> usersId = userService.getUserIdByUsername(group.getUsersName());
 		
-		if (group.getChatType() == ChatType.PRIVATE) {
-			chatService.isPrivateChatExists(usersId.get(0), usersId.get(1));
-		}
-		
 		ChatReadDTO dto = chatMapper
-				.groupToReadDto(chatService.createGroup(chatMapper.writeDtoToGroup(group, usersId)));
-
-		if (dto.getChatType() == ChatType.PRIVATE) {
-			dto.setChatName(group.getUsersName().stream().map(t -> t.toString()).collect(Collectors.joining("_")));
-		}
+				.groupToReadDto(chatService.createChat(chatMapper.writeDtoToGroup(group, usersId, ChatType.GROUP)));
 
 		group.getUsersName().forEach(t -> {
 			messagingTemplate.convertAndSendToUser(t, "/chat/creation", dto);
 		});
 		return status(HttpStatus.CREATED).build();
 	}
-
+	
+	@MessageMapping("/chat/creation/private")
+	public ResponseEntity<?> createPrivateChat(@Payload ChatWriteDTO privateChat) {
+		List<Integer> usersId = userService.getUserIdByUsername(privateChat.getUsersName());
+		
+		chatService.isPrivateChatExists(usersId.get(0), usersId.get(1));
+		
+		Chat chat = chatService.createChat(chatMapper.writeDtoToGroup(privateChat, usersId, ChatType.PRIVATE));
+		
+		privateChat.getUsersName().forEach(t -> {
+			messagingTemplate.convertAndSendToUser(t, "/chat/creation", 
+					chatMapper.groupToReadDto(chatService.calcualteChatName(chat, t)));
+		});
+		return status(HttpStatus.CREATED).build();
+	}
+	
 	@GetMapping("/chat/{user}")
 	public ResponseEntity<?> isPrivatChatExists(@PathVariable("user") String nameOfUser,
 			@AuthenticationPrincipal User user) {
@@ -98,16 +100,16 @@ public class ChatController {
 		List<User> usersById = userService.getUserById(chat.getUsersId());
 
 		return messages.stream()
-				.map(t -> messageMapper.messageToReadDto(t, usersById, chat.getChatName()))
-				.toList();
+			   .map(t -> messageMapper.messageToReadDto(t, usersById, chat.getChatName()))
+			   .toList();
 	}
 
 	@MessageMapping("/messages/{chatId}")
 	@SendTo("/messages/{chatId}")
 	public MessageReadDTO sendMessages(@Payload MessageWriteDTO dto, @DestinationVariable("chatId") String chatId) {
 		return messageMapper.messageToReadDto(
-				chatService
-						.saveMessage(messageMapper.writeDtoToMessage(dto, userService.getIdByUsername(dto.getSender()), chatId)),
-				dto.getSender(), dto.getChatName());
+				chatService.saveMessage(
+						messageMapper.writeDtoToMessage(dto, userService.getIdByUsername(dto.getSender()), chatId)),
+				dto.getSender(), chatId);
 	}
 }

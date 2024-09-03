@@ -58,12 +58,10 @@ public class UserService implements UserDetailsService{
 		userReposiory.save(user);
 	}
 	
-	public void updateUserWithDTO(User user, UpdateUserDTO dto) {
-		
+	private void updateUserWithDTO(User user, UpdateUserDTO dto) {
 //		user.setAvatar(dto.getAvatar().get);
 		user.setDescription(dto.getDescription());
 		user.setUsername(dto.getUsername());
-		
 	}
 	
 	@Transactional(readOnly = true)	
@@ -116,4 +114,7 @@ public class UserService implements UserDetailsService{
 		userReposiory.save(user);
 	}
 	
+	public static User getAuth() {
+		return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	}
 }

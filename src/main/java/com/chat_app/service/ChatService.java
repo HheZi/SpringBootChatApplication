@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +21,8 @@ import org.springframework.web.client.RestTemplate;
 import com.chat_app.exception.ErrorAPIException;
 import com.chat_app.model.Chat;
 import com.chat_app.model.Message;
+import com.chat_app.model.User;
+import com.chat_app.model.enums.ChatType;
 import com.chat_app.model.projection.ChatReadDTO;
 import com.chat_app.model.projection.ChatWriteDTO;
 import com.chat_app.model.projection.MessageReadDTO;
@@ -39,9 +42,12 @@ public class ChatService {
 
 	@Autowired
 	private MessageRepository messageRepository;
+	
+	@Autowired
+	private UserService userService;
 
 	@Transactional
-	public Chat createGroup(Chat chat) {
+	public Chat createChat(Chat chat) {
 		return chatRepository.save(chat);
 	}
 
@@ -51,8 +57,11 @@ public class ChatService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<Chat> getAllGroupsByUsername(Integer usernameId) {
-		return chatRepository.findByUsersIdWithLastMessage(usernameId);
+	public List<Chat> getAllChatsByUsername(Integer usernameId) {
+		return chatRepository.findByUsersIdWithLastMessage(usernameId)
+				.stream()
+				.peek(this::calcualteChatName)
+				.toList();
 	}
 	
 	@Transactional(readOnly = true)
@@ -61,8 +70,8 @@ public class ChatService {
 	}
 
 	public Chat findChatByChatId(String chatId) {
-		return chatRepository.findByChatId(chatId)
-				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "Chat is not found!"));
+		return calcualteChatName(chatRepository.findByChatId(chatId)
+				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "Chat is not found!")));
 	}
 	
 	@Transactional(readOnly = true)
@@ -74,12 +83,27 @@ public class ChatService {
 	
 	@Transactional(readOnly = true)
 	public void isPrivateChatExists(Integer firstUserId, Integer secondUserId) {
-		boolean b = chatRepository.existsByChatNameIn(new String[] { String.format("%d_%d", firstUserId, secondUserId),
-				String.format("%d_%d", secondUserId, firstUserId) });
+		boolean b = chatRepository.existsByChatNameInAndChatType(new String[] { String.format("%d_%d", firstUserId, secondUserId),
+				String.format("%d_%d", secondUserId, firstUserId) }, ChatType.PRIVATE);
 		if (b) {
 			throw new ErrorAPIException(HttpStatus.CONFLICT, "The group already exists");
 		}
 		
 	}
 	
+	public Chat calcualteChatName(Chat chat) {
+		return calcualteChatName(chat, ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername());
+	}
+	
+	public Chat calcualteChatName(Chat chat, String authUser) {
+		if (chat.getChatType() == ChatType.PRIVATE) {
+			chat.setChatName(userService.getUserById(chat.getUsersId())
+					.stream()
+					.filter(u -> !u.getUsername().equals(authUser))
+					.findAny()
+					.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "The user is not found"))
+					.getUsername());
+		}
+		return chat;
+	}
 }

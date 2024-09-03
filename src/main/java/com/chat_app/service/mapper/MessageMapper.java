@@ -31,16 +31,16 @@ public class MessageMapper{
 		return messageToReadDto(entity, username, chatName);
 	}
 	
-	public MessageReadDTO messageToReadDto(Message entity, String username, String chatName) {
+	public MessageReadDTO messageToReadDto(Message entity, String username, String chatId) {
 		return MessageReadDTO.builder()
-				.chatName(chatName)
+				.chatId(chatId)
 				.content(entity.getContent())
 				.timestamp(entity.getTimestamp())
 				.sender(username)
 				.build();
 	}
 	
-	protected String mapToSendeAndContentString(Optional<Message> message,String username) {
+	protected String mapToSendeAndContentString(Optional<Message> message, String username) {
 		return message.map(t -> String.format("%s: %s", username, t.getContent()))
 				.orElse("");
 	}
