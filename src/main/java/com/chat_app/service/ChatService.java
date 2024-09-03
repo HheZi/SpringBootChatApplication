@@ -60,8 +60,8 @@ public class ChatService {
 		return messageRepository.findByChatId(chatId);
 	}
 
-	public Chat findChatById(String chatId) {
-		return chatRepository.findById(chatId)
+	public Chat findChatByChatId(String chatId) {
+		return chatRepository.findByChatId(chatId)
 				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "Chat is not found!"));
 	}
 	

@@ -52,24 +52,27 @@ public class ChatController {
 
 	@GetMapping("/chat/groups")
 	public List<ChatReadDTO> getAllGroups(@AuthenticationPrincipal User user) {
-		return chatService.getAllGroupsByUsername(user.getId()).stream().peek(t -> {
-			if (t.getChatType() == ChatType.PRIVATE) {
-				t.setChatName(userService.getUserById(t.getUsersId()).stream().map(u -> u.getUsername())
-						.collect(Collectors.joining("_")));
-			}
-		}).map(chatMapper::groupToReadDto).toList();
+		return chatService.getAllGroupsByUsername(user.getId())
+				.stream().peek(t -> {
+					if (t.getChatType() == ChatType.PRIVATE) {
+						t.setChatName(userService.getUserById(t.getUsersId()).stream().map(u -> u.getUsername())
+								.collect(Collectors.joining("_")));
+					}
+				})
+				.map(chatMapper::groupToReadDto)
+				.toList();
 	}
 
 	@MessageMapping("/chat/creation")
 	public ResponseEntity<?> createGroup(@Payload ChatWriteDTO group) {
-		List<Integer> userIdByUsername = userService.getUserIdByUsername(group.getUsersName());
+		List<Integer> usersId = userService.getUserIdByUsername(group.getUsersName());
 		
 		if (group.getChatType() == ChatType.PRIVATE) {
-			chatService.isPrivateChatExists(userIdByUsername.get(0), userIdByUsername.get(1));
+			chatService.isPrivateChatExists(usersId.get(0), usersId.get(1));
 		}
 		
 		ChatReadDTO dto = chatMapper
-				.groupToReadDto(chatService.createGroup(chatMapper.writeDtoToGroup(group, userIdByUsername)));
+				.groupToReadDto(chatService.createGroup(chatMapper.writeDtoToGroup(group, usersId)));
 
 		if (dto.getChatType() == ChatType.PRIVATE) {
 			dto.setChatName(group.getUsersName().stream().map(t -> t.toString()).collect(Collectors.joining("_")));
@@ -90,19 +93,21 @@ public class ChatController {
 
 	@GetMapping("/chat/messages/{chatId}")
 	public List<MessageReadDTO> getMessages(@PathVariable("chatId") String chatId) {
-		Chat chat = chatService.findChatById(chatId);
-		List<Message> messages = chatService.findMessagesByChatId(chat.getId());
+		Chat chat = chatService.findChatByChatId(chatId);
+		List<Message> messages = chatService.findMessagesByChatId(chat.getChatId());
 		List<User> usersById = userService.getUserById(chat.getUsersId());
 
-		return messages.stream().map(t -> messageMapper.messageToReadDto(t, usersById, chat.getChatName())).toList();
+		return messages.stream()
+				.map(t -> messageMapper.messageToReadDto(t, usersById, chat.getChatName()))
+				.toList();
 	}
 
-	@MessageMapping("/messages/{chatName}")
-	@SendTo("/messages/{chatName}")
-	public MessageReadDTO sendMessages(@Payload MessageWriteDTO dto, @DestinationVariable("chatName") String chatName) {
+	@MessageMapping("/messages/{chatId}")
+	@SendTo("/messages/{chatId}")
+	public MessageReadDTO sendMessages(@Payload MessageWriteDTO dto, @DestinationVariable("chatId") String chatId) {
 		return messageMapper.messageToReadDto(
 				chatService
-						.saveMessage(messageMapper.writeDtoToMessage(dto, userService.getIdByUsername(dto.getSender()),chatName)),
+						.saveMessage(messageMapper.writeDtoToMessage(dto, userService.getIdByUsername(dto.getSender()), chatId)),
 				dto.getSender(), dto.getChatName());
 	}
 }

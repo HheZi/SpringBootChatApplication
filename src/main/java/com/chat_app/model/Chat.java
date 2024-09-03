@@ -27,6 +27,8 @@ public class Chat {
 	
 	private String chatName;
 	
+	private String chatId;
+		
 	private List<Integer> usersId;
 	
 	private List<Message> lastMessage;

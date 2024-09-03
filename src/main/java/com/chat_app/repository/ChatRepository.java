@@ -21,7 +21,7 @@ public interface ChatRepository extends MongoRepository<Chat, String>{
 			"{$match: {usersId: ?0}}",
 			"{$lookup: {"
 			+ "from: 'message',"
-			+ "localField: '_id',"
+			+ "localField: 'chatId',"
 			+ "foreignField: 'chatId',"
 			+ "as: 'lastMessage',"
 			+ "pipeline: ["
@@ -35,4 +35,6 @@ public interface ChatRepository extends MongoRepository<Chat, String>{
 	public boolean existsByChatNameIn(String[] chatName);
 	
 	public Optional<Chat> findByChatName(String chatName);
+	
+	public Optional<Chat> findByChatId(String chatId);
 }
