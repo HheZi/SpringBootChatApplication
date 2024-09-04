@@ -24,11 +24,11 @@ public class MessageMapper{
 				.build();
 	}
 
-	public MessageReadDTO messageToReadDto(Message entity, List<User> userId, String chatName) {
+	public MessageReadDTO messageToReadDto(Message entity, List<User> userId, String chatId) {
 		String username = userId.stream()
 		.filter(u -> u.getId() == entity.getSenderId())
 		.findFirst().get().getUsername();
-		return messageToReadDto(entity, username, chatName);
+		return messageToReadDto(entity, username, chatId);
 	}
 	
 	public MessageReadDTO messageToReadDto(Message entity, String username, String chatId) {
@@ -37,6 +37,7 @@ public class MessageMapper{
 				.content(entity.getContent())
 				.timestamp(entity.getTimestamp())
 				.sender(username)
+				.messageId(entity.getId())
 				.build();
 	}
 	

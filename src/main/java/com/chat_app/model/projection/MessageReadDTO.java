@@ -25,6 +25,8 @@ public class MessageReadDTO {
 
 	private String sender;
 	
+	private String messageId;
+	
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "UTC",  shape = Shape.STRING)
 	private Instant timestamp;
 }

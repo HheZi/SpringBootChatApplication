@@ -35,5 +35,4 @@ public class ChatWriteDTO {
 	@Nullable
 	private String description;
 	
-	private String authUsername;
 }

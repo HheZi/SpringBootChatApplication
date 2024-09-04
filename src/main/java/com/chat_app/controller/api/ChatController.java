@@ -59,7 +59,7 @@ public class ChatController {
 	}
 
 	@MessageMapping("/chat/creation/group")
-	public ResponseEntity<?> createGroupChat(@Payload ChatWriteDTO group) {
+	public void createGroupChat(@Payload ChatWriteDTO group) {
 		List<Integer> usersId = userService.getUserIdByUsername(group.getUsersName());
 		
 		ChatReadDTO dto = chatMapper
@@ -68,11 +68,10 @@ public class ChatController {
 		group.getUsersName().forEach(t -> {
 			messagingTemplate.convertAndSendToUser(t, "/chat/creation", dto);
 		});
-		return status(HttpStatus.CREATED).build();
 	}
 	
 	@MessageMapping("/chat/creation/private")
-	public ResponseEntity<?> createPrivateChat(@Payload ChatWriteDTO privateChat) {
+	public void createPrivateChat(@Payload ChatWriteDTO privateChat) {
 		List<Integer> usersId = userService.getUserIdByUsername(privateChat.getUsersName());
 		
 		chatService.isPrivateChatExists(usersId.get(0), usersId.get(1));
@@ -83,7 +82,6 @@ public class ChatController {
 			messagingTemplate.convertAndSendToUser(t, "/chat/creation", 
 					chatMapper.groupToReadDto(chatService.calcualteChatName(chat, t)));
 		});
-		return status(HttpStatus.CREATED).build();
 	}
 	
 	@GetMapping("/chat/{user}")
@@ -100,10 +98,16 @@ public class ChatController {
 		List<User> usersById = userService.getUserById(chat.getUsersId());
 
 		return messages.stream()
-			   .map(t -> messageMapper.messageToReadDto(t, usersById, chat.getChatName()))
+			   .map(t -> messageMapper.messageToReadDto(t, usersById, chatId))
 			   .toList();
 	}
 
+	@MessageMapping("/messages/{chatId}/{messageId}")
+	@SendTo("/messages/{chatId}")
+	public String deleteMessageAndReturnId(@DestinationVariable("messageId") String messageId) {
+		return chatService.deleteMessageById(messageId);
+	}
+	
 	@MessageMapping("/messages/{chatId}")
 	@SendTo("/messages/{chatId}")
 	public MessageReadDTO sendMessages(@Payload MessageWriteDTO dto, @DestinationVariable("chatId") String chatId) {

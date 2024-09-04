@@ -83,14 +83,18 @@ public class ChatService {
 	
 	@Transactional(readOnly = true)
 	public void isPrivateChatExists(Integer firstUserId, Integer secondUserId) {
-		boolean b = chatRepository.existsByChatNameInAndChatType(new String[] { String.format("%d_%d", firstUserId, secondUserId),
-				String.format("%d_%d", secondUserId, firstUserId) }, ChatType.PRIVATE);
+		boolean b = chatRepository.existsByUsersIdInAndChatType(new Integer[] {firstUserId, secondUserId}, ChatType.PRIVATE);
 		if (b) {
 			throw new ErrorAPIException(HttpStatus.CONFLICT, "The group already exists");
 		}
 		
 	}
 	
+	public String deleteMessageById(String id) {
+		messageRepository.deleteById(id);
+		return id;
+	}
+
 	public Chat calcualteChatName(Chat chat) {
 		return calcualteChatName(chat, ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername());
 	}

@@ -33,7 +33,7 @@ public interface ChatRepository extends MongoRepository<Chat, String>{
 	})
 	List<Chat> findByUsersIdWithLastMessage(Integer usersId);
 	
-	public boolean existsByChatNameInAndChatType(String[] chatName, ChatType chatType);
+	public boolean existsByUsersIdInAndChatType(Integer[] chatId, ChatType chatType);
 	
 	public Optional<Chat> findByChatName(String chatName);
 	

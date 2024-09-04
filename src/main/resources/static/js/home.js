@@ -1,11 +1,16 @@
 let stompClient;
 let usernameOfCurrentUser;
-let currentGroupSocketUrl;
+let currentChatUrl;
 let currentChatId;
+let currentDeleteMessageUrl;
 let usersInGroups = [];
 
 function onMessageReceived(resp){
 	const message = JSON.parse(resp.body);
+	if(!message.chatId){
+		$("#"+message).remove();
+		return;
+	}
 	var tag = $(`#${message.chatId} .last-message`);
 	if(message.chatId === currentChatId){
 		displayMessage(message);	
@@ -27,10 +32,15 @@ function onGroupReceived(resp){
 	displayChat(chat);
 }
 
+function onDeleteMessage(resp){
+
+}
+
 function connect(){
 	stompClient = Stomp.over(new SockJS('/ws'));
     stompClient.connect({}, onConnected);
 }
+
 
 function onConnected(){
 	$.get("/api/users/auth")
@@ -50,35 +60,41 @@ function onConnected(){
 	
 }
 
-function createGroup(url, groupName, description, usersInGroups, authUsername){
+function createGroup(url, groupName, description, usersInGroups){
 	stompClient.send("/app" + url, {}, JSON.stringify({
 		'chatName': groupName,
 		'description': description,
 		'usersName': usersInGroups,
-		 authUsername: authUsername
 	}))
 }
 
 function displayMessage(message){
-	let tagPos = (usernameOfCurrentUser === message.sender) ? "float-right" : "float-left";
-	const row = `<div>
-				<div class="message ${tagPos}">
-                  <div class="message-content">
-                   <span class="sender-name">${message.sender}</span>
-                        <p>${message.content}</p>
-                        <span class="timestamp">${message.timestamp}</span>
-                 </div>
-              </div></div>`;
-           //  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" 
-			//		fill="currentColor" class="bi bi-trash-fill " viewBox="0 0 16 16">
-			//	  <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
-			//	</svg>
+	let isSenderAsSameAsAuthUser = usernameOfCurrentUser === message.sender;
+	let tagPos = (isSenderAsSameAsAuthUser) ? "float-right" : "float-left";
+	const row = `<div class="message ${tagPos}" id="${message.messageId}">
+               ${ isSenderAsSameAsAuthUser ? `<svg onclick="deleteMessage('${message.messageId}')" xmlns="http://www.w3.org/2000/svg" width="16" class="trash-icon mt-2" height="16" fill="currentColor"
+                            class="bi bi-trash-fill " viewBox="0 0 16 16">
+                            <path
+                                d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0" />
+                            </svg>` : ""}
+                            <div class="message-content">
+                                <span class="sender-name">${message.sender}</span>
+                                <p>${message.content}</p>
+                                <span class="timestamp">${message.timestamp}</span>
+                            </div>
+                        </div>`;
+    						
+            
 	$(".chat-body").append(row);
 	$(".chat-body").scrollTop($(".chat-body").prop('scrollHeight'));
 }
 
+function deleteMessage(messageId){
+	stompClient.send("/app" + currentChatUrl + "/" +messageId, {}, messageId)
+}
+
 function displayChat(chat){
-	const row = `<div class="group-item" onclick="getChat('${chat.chatName}', '${chat.chatId}', '${chat.groupSocketUrl}')" 
+	const row = `<div class="group-item" onclick="getChat('${chat.chatName}', '${chat.chatId}', '${chat.groupSocketUrl}', '${chat.deleteMessageUrl}')" 
 							id="${chat.chatId}">
 		                   <img src="https://via.placeholder.com/40" alt="Group Icon">
 		                   <div class="group-details">
@@ -91,7 +107,7 @@ function displayChat(chat){
 }
 
 
-function getChat(chatName, chatId, groupSocketUrl){
+function getChat(chatName, chatId, groupSocketUrl, deleteMessageUrl){
 	if(chatId === currentChatId)
 		return;
 		
@@ -101,7 +117,7 @@ function getChat(chatName, chatId, groupSocketUrl){
 	$("#sendBut").prop('disabled', false);
 	$("#sendInput").prop('disabled', false);
 	$("#chatName").text(chatName);
-	[currentChatId, currentGroupSocketUrl] = [chatId, groupSocketUrl];
+	[currentChatId, currentChatUrl, currentDeleteMessageUrl] = [chatId, groupSocketUrl, deleteMessageUrl];
 	
 	$.get(`/chat`+groupSocketUrl)
 	.done((data) =>{
@@ -236,7 +252,7 @@ $(document).ready(function () {
 		content: $("#sendInput").val(),
 		sender: usernameOfCurrentUser,
 	}
-	stompClient.send("/app" + currentGroupSocketUrl, {}, JSON.stringify(message))
+	stompClient.send("/app" + currentChatUrl, {}, JSON.stringify(message))
 	$("#sendInput").val("");
 	});
 	
