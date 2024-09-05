@@ -90,6 +90,16 @@ public class ChatService {
 		
 	}
 	
+	public Chat updateChatByDto(Chat chat, ChatWriteDTO dto, List<Integer> list) {
+		chat.setDescription(dto.getDescription());
+		if (chat.getChatType() == ChatType.GROUP) {
+			chat.setUsersId(list);
+			chat.setChatName(dto.getChatName());
+		}
+		
+		return chat;
+	}
+	
 	public String deleteMessageById(String id) {
 		messageRepository.deleteById(id);
 		return id;

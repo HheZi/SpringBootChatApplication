@@ -33,5 +33,7 @@ public class Chat {
 	
 	private List<Message> lastMessage;
 	
+	private String description;
+	
 	private ChatType chatType;
 }

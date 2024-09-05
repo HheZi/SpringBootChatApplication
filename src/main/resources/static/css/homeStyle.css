@@ -31,6 +31,11 @@ body {
 	padding: 10px;
 }
 
+#chatName:hover{
+	text-decoration: underline;
+	cursor: pointer;
+}
+
 .chat-body {
 	flex: 1;
 	overflow-y: auto;

@@ -16,6 +16,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.chat_app.exception.ErrorAPIException;
@@ -24,6 +26,7 @@ import com.chat_app.model.Message;
 import com.chat_app.model.User;
 import com.chat_app.model.enums.ChatType;
 import com.chat_app.model.projection.ChatReadDTO;
+import com.chat_app.model.projection.ChatToUpdateDTO;
 import com.chat_app.model.projection.ChatWriteDTO;
 import com.chat_app.model.projection.MessageReadDTO;
 import com.chat_app.model.projection.MessageWriteDTO;
@@ -58,16 +61,39 @@ public class ChatController {
 				.toList();
 	}
 
+	@GetMapping("/chat/groups/{chatId}")
+	public ChatToUpdateDTO getChatForUpdate(@PathVariable("chatId") String chatId) {
+		Chat chat = chatService.findChatByChatId(chatId);
+		List<String> list = userService.getUserById(chat.getUsersId())
+		.stream()
+		.map(User::getUsername)
+		.toList();
+		return chatMapper.chatToChatUpdateDTO(chat, list);
+	}
+	
+	@PutMapping("/chat/groups/{chatId}")
+	public ResponseEntity<?> updateChat(@PathVariable("chatId") String chatId, @RequestBody ChatWriteDTO dto){
+		Chat chatByDto = chatService.updateChatByDto(chatService.findChatByChatId(chatId), dto, userService.getUserIdByUsername(dto.getUsersName()));
+		
+		sendMessageToUsers(chatByDto, dto.getUsersName());
+		
+		return  ResponseEntity.status(HttpStatus.CREATED).build();
+	}
+	
+	public void sendMessageToUsers(Chat chat, List<String> users) {
+		users.forEach(t -> {
+			messagingTemplate.convertAndSendToUser(t, "/chat/creation", chat.getChatType() == ChatType.PRIVATE ?
+					chatMapper.groupToReadDto(chatService.calcualteChatName(chat, t)) : chatMapper.groupToReadDto(chat));
+		});
+	}
+	
 	@MessageMapping("/chat/creation/group")
 	public void createGroupChat(@Payload ChatWriteDTO group) {
 		List<Integer> usersId = userService.getUserIdByUsername(group.getUsersName());
+				
+		Chat chat = chatService.createChat(chatMapper.writeDtoToGroup(group, usersId, ChatType.GROUP));
 		
-		ChatReadDTO dto = chatMapper
-				.groupToReadDto(chatService.createChat(chatMapper.writeDtoToGroup(group, usersId, ChatType.GROUP)));
-
-		group.getUsersName().forEach(t -> {
-			messagingTemplate.convertAndSendToUser(t, "/chat/creation", dto);
-		});
+		sendMessageToUsers(chat, group.getUsersName());
 	}
 	
 	@MessageMapping("/chat/creation/private")
@@ -78,10 +104,7 @@ public class ChatController {
 		
 		Chat chat = chatService.createChat(chatMapper.writeDtoToGroup(privateChat, usersId, ChatType.PRIVATE));
 		
-		privateChat.getUsersName().forEach(t -> {
-			messagingTemplate.convertAndSendToUser(t, "/chat/creation", 
-					chatMapper.groupToReadDto(chatService.calcualteChatName(chat, t)));
-		});
+		sendMessageToUsers(chat, privateChat.getUsersName());
 	}
 	
 	@GetMapping("/chat/{user}")
