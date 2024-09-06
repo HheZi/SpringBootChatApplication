@@ -3,36 +3,19 @@ package com.chat_app.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Limit;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.client.RestTemplate;
 
 import com.chat_app.exception.ErrorAPIException;
 import com.chat_app.model.Chat;
 import com.chat_app.model.Message;
 import com.chat_app.model.User;
 import com.chat_app.model.enums.ChatType;
-import com.chat_app.model.projection.ChatReadDTO;
 import com.chat_app.model.projection.ChatWriteDTO;
-import com.chat_app.model.projection.MessageReadDTO;
-import com.chat_app.model.projection.MessageWriteDTO;
 import com.chat_app.repository.ChatRepository;
 import com.chat_app.repository.MessageRepository;
-import com.chat_app.service.mapper.ChatMapper;
-import com.chat_app.service.mapper.MessageMapper;
-
-import ch.qos.logback.core.rolling.helper.IntegerTokenConverter;
 
 @Service
 public class ChatService {
@@ -47,10 +30,15 @@ public class ChatService {
 	private UserService userService;
 
 	@Transactional
-	public Chat createChat(Chat chat) {
+	public Chat createOrUpdateChat(Chat chat) {
 		return chatRepository.save(chat);
 	}
 
+	@Transactional
+	public void deleteChat(Chat chat) {
+		chatRepository.delete(chat);
+	}
+	
 	@Transactional
 	public Message saveMessage(Message message) {
 		return messageRepository.save(message);
@@ -69,6 +57,7 @@ public class ChatService {
 		return messageRepository.findByChatId(chatId);
 	}
 
+	@Transactional(readOnly = true)
 	public Chat findChatByChatId(String chatId) {
 		return calcualteChatName(chatRepository.findByChatId(chatId)
 				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "Chat is not found!")));
@@ -82,12 +71,8 @@ public class ChatService {
 	}
 	
 	@Transactional(readOnly = true)
-	public void isPrivateChatExists(Integer firstUserId, Integer secondUserId) {
-		boolean b = chatRepository.existsByUsersIdInAndChatType(new Integer[] {firstUserId, secondUserId}, ChatType.PRIVATE);
-		if (b) {
-			throw new ErrorAPIException(HttpStatus.CONFLICT, "The group already exists");
-		}
-		
+	public Boolean isPrivateChatExists(Integer firstUserId, Integer secondUserId) {
+		return chatRepository.existsByUsersIdInAndChatType(new Integer[] {firstUserId, secondUserId}, ChatType.PRIVATE);
 	}
 	
 	public Chat updateChatByDto(Chat chat, ChatWriteDTO dto, List<Integer> list) {
@@ -100,11 +85,16 @@ public class ChatService {
 		return chat;
 	}
 	
+	@Transactional
 	public String deleteMessageById(String id) {
 		messageRepository.deleteById(id);
 		return id;
 	}
 
+	public void deleteAllMessagesByChatId(String chatId) {
+		messageRepository.deleteByChatId(chatId);
+	}
+	
 	public Chat calcualteChatName(Chat chat) {
 		return calcualteChatName(chat, ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername());
 	}

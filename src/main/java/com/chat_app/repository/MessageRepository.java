@@ -20,4 +20,5 @@ public interface MessageRepository extends MongoRepository<Message, String>{
 	@Query(value = "{chatName: ?0}", sort = "{timestamp: -1}")
 	Optional<Message> findLastMessageByTimestamp(String groupName);
 	
+	public void deleteByChatId(String chatId);
 }

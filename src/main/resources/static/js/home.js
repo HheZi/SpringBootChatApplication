@@ -26,9 +26,25 @@ function onMessageReceived(resp){
 	$("#group-container").prepend($(`#${message.chatId}`)).prependTo($("#group-container"));
 }
 
-function onGroupReceived(resp){
+function onChatReceived(resp){
 	const chat = JSON.parse(resp.body);
-	displayChat(chat);
+	if(!chat.chatName){
+		$("#"+chat).remove();
+		$("#chatName").text("");
+		$(".chat-body").text("")
+		$("#sendInput").prop("disabled", true)
+		$("#sendBut").prop("disabled", true)
+		return;
+	}
+	const tag = $("#"+chat.chatId + " .group-details");
+	if(tag.length){
+		tag.children(".group-name").text(chat.chatName)
+		if($("#chatName").text()){
+			$("#chatName").text(chat.chatName);
+		}
+	}
+	else
+		displayChat(chat);
 }
 
 function connect(){
@@ -41,11 +57,11 @@ function onConnected(){
 	$.get("/api/users/auth")
 	.done((usernameResp) => {
 		usernameOfCurrentUser = usernameResp;
-		stompClient.subscribe("/user/chat/creation", onGroupReceived)
+		stompClient.subscribe("/user/chat/creation", onChatReceived)
 		$("#username").text(usernameResp);
 		$("#usernameProfileContainer").on('click', () => getInfoAboutUser(usernameOfCurrentUser))
 		
-		$.get(`/chat/groups`)
+		$.get(`/chat`)
 	    .then((data) => {
 			data.forEach((group) => {
 		        displayChat(group)
@@ -89,11 +105,11 @@ function deleteMessage(messageId){
 }
 
 function displayChat(chat){
-	const row = `<div class="group-item" onclick="getChat('${chat.chatName}', '${chat.chatId}', '${chat.groupSocketUrl}', '${chat.deleteMessageUrl}')" 
+	const row = `<div class="group-item" onclick="getChat('${chat.chatId}', '${chat.groupSocketUrl}')" 
 							id="${chat.chatId}">
 		                   <img src="https://via.placeholder.com/40" alt="Group Icon">
 		                   <div class="group-details">
-		                       <div class="group-name">${chat.chatName}</div>
+		                       <div class="group-name" >${chat.chatName}</div>
 		                       <div class="last-message">${chat.lastMessage}</div>
 		                   </div>
 		               </div>`;
@@ -102,7 +118,7 @@ function displayChat(chat){
 }
 
 
-function getChat(chatName, chatId, groupSocketUrl){
+function getChat(chatId, groupSocketUrl){
 	if(chatId === currentChatId)
 		return;
 
@@ -111,11 +127,21 @@ function getChat(chatName, chatId, groupSocketUrl){
 	$(".chat-body").text("");
 	$("#sendBut").prop('disabled', false);
 	$("#sendInput").prop('disabled', false);
-	$("#chatName").text(chatName);
+	$("#chatName").text($("#" + chatId + " .group-name").text());
 	$("#chatName").on("click", () => getInfoAboutChat(chatId));
+	$("#deleteChatBut").on("click", () => {
+		$.ajax({
+			url: '/chat/'+chatId,
+			type: 'DELETE',
+			contentType: "application/json",
+			success: function() {
+				showMessage("You have deleted the chat", "success-message")
+			},
+		})
+	});
 	[currentChatId, currentChatUrl] = [chatId, groupSocketUrl];
 	
-	$.get(`/chat`+groupSocketUrl)
+	$.get(`/chat`+currentChatUrl)
 	.done((data) =>{
 		data.forEach((message) => {
 			displayMessage(message)
@@ -166,7 +192,7 @@ function addToUsersInGroup(usernameToAdd){
 }
 
 function deleteUserFromGroup(usernameToDel){
-	usersInChat.splice(usersInChat.indexOf(usernameToDel))
+	usersInChat.splice(usersInChat.indexOf(usernameToDel), 1)
 	$(`#${usernameToDel}User`).remove();
 }
 
@@ -210,25 +236,17 @@ function getInfoAboutUser(username){
 					}),
 				    dataType: "json",
 				    success: function() {
-				        showMessage("You update a profile", "success-messagew")
+				        showMessage("You update a profile", "success-message")
 				    },
-				    error: function(resp) {
-						showMessage(resp.responseJSON.message, "error-message")
-			        }
 				});
 			})		
 		}
 		else{
 			$("#profileModalFooter").append(`<button type="button" id="writeToUserBut" class="btn btn-primary">Write to ${user.username}</button>`);
 			$("#writeToUserBut").on("click", function(){
-				$.get("/chat/"+user.username)
-				.done(() =>  {
-					createGroup("/chat/creation/private", null, null, [user.username, usernameOfCurrentUser])
-					$("#profileModal").modal("hide");
-				})
-				.fail((resp) =>  {
-					showMessage(resp.responseJSON.message, "error-message");
-				})
+				createGroup("/chat/creation/private", null, null, [user.username, usernameOfCurrentUser])
+				$("#profileModal").modal("hide");
+				
 			})
 		}
 	})
@@ -238,9 +256,10 @@ function getInfoAboutUser(username){
 }
 
 function getInfoAboutChat(chatId){
-	$.get("/chat/groups/"+chatId)
+	$.get("/chat/"+chatId)
 	.done((chat) =>{
 		openChatModal();
+		$("#deleteChatBut").removeClass("d-none");
 		if(chat.chatType === "PRIVATE"){
 			$("#groupNameInput").attr('readonly', true);
 			$("#groupNameInput").addClass("text-dark");	
@@ -249,31 +268,12 @@ function getInfoAboutChat(chatId){
 		}
 		$("#groupNameInput").val(chat.chatName);
 		$("#groupDescriptionInput").val(chat.description);
-		usersInChat = [];
 		$("#selectedUsers").text("");
 		chat.usersInChat.forEach(username => addToUsersInGroup(username));
-		$("#chatFooter").text(`<button type="button" class="btn btn-primary"
-						id="updateChat">Update chat</button>`);
-		$("#updateChat").on("click", () => {
-			$.ajax({
-				url: "/chat/groups/"+currentChatId,
-				type: 'PUT',
-				data: JSON.stringify({
-					chatName: $("#groupNameInput").val(),
-					description: $("#groupDescriptionInput").val(),
-					usersName: usersInChat
-				}),
-				contentType: "application/json",
-				dataType: "json",
-				 success: function() {
-				    showMessage("You update the chat", "success-messagew")
-				 },
-				 error: function(resp) {
-					showMessage(resp.responseJSON.message, "error-message")
-			     }
-			})
-		})
-		$("#createGroupModal").modal('show');
+		$("#createGroupButton").text("Update chat");
+		
+		$("#createGroupButton").unbind();
+		$("#createGroupButton").on("click", () => updateChatHandler());
 	})
 	.fail((fail) => {
 		showMessage(fail.responseJSON.message, "error-message")
@@ -282,8 +282,6 @@ function getInfoAboutChat(chatId){
 
 
 function openChatModal(){
-	    $("#chatFooter").text(`<button type="button" class="btn btn-primary"
-						id="createGroupButton">Create Group</button>`);
         usersInChat =[];
         $("#searchUsersInModal").attr('readonly', false);
 		$("#searchUsersInModal").removeClass("text-dark");	
@@ -296,6 +294,34 @@ function openChatModal(){
         $('#createGroupModal').modal('show');
 }
 
+function updateChatHandler(){
+	$.ajax({
+				url: "/chat/"+currentChatId,
+				type: 'PUT',
+				data: JSON.stringify({
+					chatName: $("#groupNameInput").val(),
+					description: $("#groupDescriptionInput").val(),
+					usersName: usersInChat
+				}),
+				contentType: "application/json",
+				dataType: "json",
+				 success: function() {
+				    showMessage("You have update the chat", "success-message")
+				 },
+			})
+}
+
+function createChatHandler(){
+		if(usersInChat.length === 0){
+			 showMessage("At least one user need to be in group", "error-message")
+		}
+		createGroup("/chat/creation/group", $('#groupNameInput').val(), $('#groupDescriptionInput').val(), usersInChat)
+		usersInChat = [];
+		$("#selectedUsers").text("");
+		$('#groupNameInput').val("");
+	    $('#groupDescriptionInput').val("");
+	    showMessage("You have created the group!", "success-message");
+}
 
 $(document).ready(function () {
 	connect();
@@ -324,23 +350,14 @@ $(document).ready(function () {
     $('#openModalButton').click(function (e) {
         e.preventDefault();
 		openChatModal();
+		$("#deleteChatBut").addClass("d-none");
+		$("#createGroupButton").unbind();
+		$("#createGroupButton").on("click", () => createChatHandler());
     });
     
     $('#closeModalButton, .btn-secondary').click(function () {
         $('#createGroupModal').modal('hide');
         usersInChat = [];
-    });
-
-    $('#createGroupButton').on("click", function () {
-		if(usersInChat.length === 0){
-			 showMessage("At least one user need to be in group", "error-message")
-		}
-		createGroup("/chat/creation/group", $('#groupNameInput').val(), $('#groupDescriptionInput').val(), usersInChat)
-		usersInChat = [];
-		$("#selectedUsers").text("");
-		$('#groupNameInput').val("");
-	    $('#groupDescriptionInput').val("");
-	    showMessage("You have created the group!", "success-message");
     });
 });
 

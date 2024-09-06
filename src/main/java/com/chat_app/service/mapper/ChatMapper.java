@@ -30,6 +30,7 @@ public class ChatMapper {
 				.chatId(UUID.randomUUID().toString())
 				.usersId(usersId)
 				.chatType(chatType)
+				.description(dto.getDescription())
 				.build();
 	}
 

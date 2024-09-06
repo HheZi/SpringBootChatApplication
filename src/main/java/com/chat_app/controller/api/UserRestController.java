@@ -58,7 +58,7 @@ public class UserRestController {
 
 	@GetMapping("/auth")
 	public String getAuthUsername() {
-		return userService.getAuth().getUsername();
+		return UserService.getAuth().getUsername();
 	}
 
 	@GetMapping
