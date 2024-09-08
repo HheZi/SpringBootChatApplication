@@ -135,6 +135,7 @@ function getChat(chatId, groupSocketUrl){
 			type: 'DELETE',
 			contentType: "application/json",
 			success: function() {
+				$("#createGroupModal").modal("hide");
 				showMessage("You have deleted the chat", "success-message")
 			},
 		})
@@ -160,7 +161,7 @@ function searchUsers(e, dropdownClass, inputClass, inModal = false){
 					$(dropdownClass).append("<div class='text-center m-3'>User is not found</div>");					
 				}
 				data.forEach(user => {
-                    const item  = `<a ${(inModal) ? `onclick='addToUsersInGroup("${user.username}")'` : 
+                    const item  = `<a ${(inModal) ? `onclick='addToUsersInGroup("${user.username}", false)'` : 
                     			`onclick='getInfoAboutUser("${user.username}")'` } 
                     				class="dropdown-item text-center">
                         <img src="${user.avatarUrl}" alt="avatar" class="rounded-circle" width="30" height="30">
@@ -181,19 +182,29 @@ function searchUsers(e, dropdownClass, inputClass, inModal = false){
         }
         
 
-function addToUsersInGroup(usernameToAdd){
+function addToUsersInGroup(usernameToAdd, canBeDeleted){
 	usersInChat.push(usernameToAdd);
 	const tag = `<span class="usersInGroupContainer mr-2" id="${usernameToAdd}User">
-               <span>${usernameToAdd}</span> <a class="deleteBut" onclick="deleteUserFromGroup('${usernameToAdd}')">&times;</a>
+               <span>${usernameToAdd}</span> <a class="deleteBut"  onclick="deleteUserFromGroup('${usernameToAdd}', ${canBeDeleted})">&times;</a>
     </span>`;
      $("#selectedUsers").append(tag);
      $(".groupUsers-search-dropdown").text("");	
 	 $("#searchUsersInModal").val("");
 }
 
-function deleteUserFromGroup(usernameToDel){
+function deleteUserFromGroup(usernameToDel, canBeDeleted){
 	usersInChat.splice(usersInChat.indexOf(usernameToDel), 1)
 	$(`#${usernameToDel}User`).remove();
+	if(canBeDeleted){
+		$.ajax({
+			url: `/chat/${currentChatId}/${usernameToDel}`,
+			type: 'PUT',
+			contentType: "application/json",
+			success: function() {
+				showMessage(`${usernameToDel} kicked from chat!`, "success-message")
+			}
+		});
+	}
 }
 
 function showMessage(message, idTag){
@@ -237,7 +248,7 @@ function getInfoAboutUser(username){
 				    dataType: "json",
 				    success: function() {
 				        showMessage("You update a profile", "success-message")
-				    },
+				    }
 				});
 			})		
 		}
@@ -269,7 +280,7 @@ function getInfoAboutChat(chatId){
 		$("#groupNameInput").val(chat.chatName);
 		$("#groupDescriptionInput").val(chat.description);
 		$("#selectedUsers").text("");
-		chat.usersInChat.forEach(username => addToUsersInGroup(username));
+		chat.usersInChat.forEach(username => addToUsersInGroup(username, true));
 		$("#createGroupButton").text("Update chat");
 		
 		$("#createGroupButton").unbind();
@@ -352,6 +363,7 @@ $(document).ready(function () {
 		openChatModal();
 		$("#deleteChatBut").addClass("d-none");
 		$("#createGroupButton").unbind();
+		$("#createGroupButton").text("Create chat")
 		$("#createGroupButton").on("click", () => createChatHandler());
     });
     

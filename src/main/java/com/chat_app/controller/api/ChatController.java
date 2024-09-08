@@ -69,9 +69,9 @@ public class ChatController {
 	public ChatToUpdateDTO getChatForUpdate(@PathVariable("chatId") String chatId) {
 		Chat chat = chatService.findChatByChatId(chatId);
 		List<String> list = userService.getUserById(chat.getUsersId())
-		.stream()
-		.map(User::getUsername)
-		.toList();
+			.stream()
+			.map(User::getUsername)
+			.toList();
 		return chatMapper.chatToChatUpdateDTO(chat, list);
 	}
 	
@@ -99,6 +99,26 @@ public class ChatController {
 		});
 	}
 	
+	@PutMapping("/chat/{chatId}/{username}")
+	public ResponseEntity<?> kickUserFromChat(@PathVariable("chatId") String chatId, @PathVariable("username") String username, 
+				@AuthenticationPrincipal User user){
+		Chat chat = chatService.findChatByChatId(chatId);
+
+		Integer userId = userService.getIdByUsername(username);
+		
+		if (!chat.getUsersId().contains(user.getId())) {
+			throw new ErrorAPIException(HttpStatus.PROXY_AUTHENTICATION_REQUIRED, "Not enough rights to kick user");
+		}
+		
+		chat.getUsersId().remove(userId);
+		
+		chatService.createOrUpdateChat(chat);
+		
+		sendMessageAboutChatToUsers(chatId, List.of(username));
+		
+		return ok().build();
+	}
+	
 	@MessageMapping("/chat/creation/group")
 	public void createGroupChat(@Payload ChatWriteDTO group) {
 		Chat chat = chatService.createOrUpdateChat(
@@ -124,10 +144,10 @@ public class ChatController {
 	public ResponseEntity<?> deleteChat(@PathVariable("chatId") String chatId, @AuthenticationPrincipal User user){
 		Chat chat = chatService.findChatByChatId(chatId);
 		
-		
 		if (!chat.getUsersId().contains(user.getId())) {
 			throw new ErrorAPIException(HttpStatus.PROXY_AUTHENTICATION_REQUIRED, "Not enough rights to delete chat");
 		}
+		
 		chatService.deleteChat(chat);
 
 		chatService.deleteAllMessagesByChatId(chatId);
