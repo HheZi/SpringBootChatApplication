@@ -1,8 +1,10 @@
 let stompClient;
 let usernameOfCurrentUser;
+const subscriptions = new Map();
 let currentChatUrl;
 let currentChatId;
 let usersInChat = [];
+let canUsersBeDeleted = true;
 
 function onMessageReceived(resp){
 	const message = JSON.parse(resp.body);
@@ -11,13 +13,13 @@ function onMessageReceived(resp){
 		return;
 	}
 	var tag = $(`#${message.chatId} .last-message`);
+	tag.text("");
 	if(message.chatId === currentChatId){
 		displayMessage(message);	
-		tag.text(`${message.content}`)
+		tag.append(`${message.content}`)
 	}
 	else{
-		tag.text("");
-		tag.append(`${message.content}<span class="badge badge-pill badge-light float-right">
+		tag.append(`${message.content} <span class="badge badge-pill badge-light float-right">
 		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope-exclamation-fill" viewBox="0 0 16 16">
 		  <path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414zM0 4.697v7.104l5.803-3.558zM6.761 8.83l-6.57 4.026A2 2 0 0 0 2 14h6.256A4.5 4.5 0 0 1 8 12.5a4.49 4.49 0 0 1 1.606-3.446l-.367-.225L8 9.586zM16 4.697v4.974A4.5 4.5 0 0 0 12.5 8a4.5 4.5 0 0 0-1.965.45l-.338-.207z"/>
 		  <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.5-5v1.5a.5.5 0 0 1-1 0V11a.5.5 0 0 1 1 0m0 3a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0"/>
@@ -32,8 +34,8 @@ function onChatReceived(resp){
 		$("#"+chat).remove();
 		$("#chatName").text("");
 		$(".chat-body").text("")
-		$("#sendInput").prop("disabled", true)
-		$("#sendBut").prop("disabled", true)
+		$("#sendInput, #sendBut").prop("disabled", true)
+		subscriptions.get(chat).unsubscribe();
 		return;
 	}
 	const tag = $("#"+chat.chatId + " .group-details");
@@ -57,7 +59,7 @@ function onConnected(){
 	$.get("/api/users/auth")
 	.done((usernameResp) => {
 		usernameOfCurrentUser = usernameResp;
-		stompClient.subscribe("/user/chat/creation", onChatReceived)
+		stompClient.subscribe("/user/chat/creation", onChatReceived);
 		$("#username").text(usernameResp);
 		$("#usernameProfileContainer").on('click', () => getInfoAboutUser(usernameOfCurrentUser))
 		
@@ -114,7 +116,7 @@ function displayChat(chat){
 		                   </div>
 		               </div>`;
 	$("#group-container").append(row);			
-	stompClient.subscribe(chat.groupSocketUrl, onMessageReceived);
+	subscriptions.set(chat.chatId, stompClient.subscribe(chat.groupSocketUrl, onMessageReceived));
 }
 
 
@@ -125,8 +127,7 @@ function getChat(chatId, groupSocketUrl){
 	$(`#${chatId} .badge`).remove();
 	$("#sendInput").val("");
 	$(".chat-body").text("");
-	$("#sendBut").prop('disabled', false);
-	$("#sendInput").prop('disabled', false);
+	$("#sendBut, #sendInput").prop('disabled', false);
 	$("#chatName").text($("#" + chatId + " .group-name").text());
 	$("#chatName").on("click", () => getInfoAboutChat(chatId));
 	$("#deleteChatBut").on("click", () => {
@@ -182,20 +183,25 @@ function searchUsers(e, dropdownClass, inputClass, inModal = false){
         }
         
 
-function addToUsersInGroup(usernameToAdd, canBeDeleted){
+function addToUsersInGroup(usernameToAdd){
 	usersInChat.push(usernameToAdd);
-	const tag = `<span class="usersInGroupContainer mr-2" id="${usernameToAdd}User">
-               <span>${usernameToAdd}</span> <a class="deleteBut"  onclick="deleteUserFromGroup('${usernameToAdd}', ${canBeDeleted})">&times;</a>
+	const aTag = canUsersBeDeleted && usernameToAdd !== usernameOfCurrentUser 
+		? `<a class="deleteBut"  onclick="deleteUserFromGroup('${usernameToAdd}')">&times;</a>` 
+		: ""
+	const tag = `<span class="usersInGroupContainer mr-2" id="${usernameToAdd}User"> 
+               <span>${usernameToAdd}</span> ${aTag}
     </span>`;
      $("#selectedUsers").append(tag);
      $(".groupUsers-search-dropdown").text("");	
 	 $("#searchUsersInModal").val("");
 }
 
-function deleteUserFromGroup(usernameToDel, canBeDeleted){
+function deleteUserFromGroup(usernameToDel){
+	if(!canUsersBeDeleted)
+		return;
 	usersInChat.splice(usersInChat.indexOf(usernameToDel), 1)
 	$(`#${usernameToDel}User`).remove();
-	if(canBeDeleted){
+	if(canUsersBeDeleted){
 		$.ajax({
 			url: `/chat/${currentChatId}/${usernameToDel}`,
 			type: 'PUT',
@@ -216,10 +222,8 @@ function showMessage(message, idTag){
 
 function getInfoAboutUser(username){
 	$("#profileModalFooter").text("");
-	$("#profileDesc").addClass("text-dark");
-	$("#profileUsername").addClass("text-dark");
-	$('#profileDesc').attr('readonly', true);
-	$('#profileUsername').attr('readonly', true);
+	$("#profileDesc, #profileUsername").addClass("text-dark");
+	$('#profileDesc, #profileUsername').attr('readonly', true);
 	$.get(`/api/users/${username}`)
 	.done((user) => {
 		$("#profileUsername").val(user.username);
@@ -227,10 +231,8 @@ function getInfoAboutUser(username){
 		$("#profileModal").modal("show");
 		if(user.username === usernameOfCurrentUser){
 			$("#profileDesc").val(user.description || "");
-			$("#profileDesc").removeClass("text-dark");
-			$("#profileUsername").removeClass("text-dark");
-			$('#profileDesc').attr('readonly', false);
-			$('#profileUsername').attr('readonly', false);
+			$("#profileDesc, #profileUsername").removeClass("text-dark");
+			$('#profileDesc, #profileUsername').attr('readonly', false);
 			$("#profileModalFooter").append(`<button type="button" id="logoutBut" class="btn btn-primary">Logout</button>`);
 			$("#profileModalFooter").append(`<button type="button" id="saveUserProfile" class="btn btn-primary">Save changes</button>`);
 			$("#logoutBut").on('click', function(){
@@ -272,10 +274,9 @@ function getInfoAboutChat(chatId){
 		openChatModal();
 		$("#deleteChatBut").removeClass("d-none");
 		if(chat.chatType === "PRIVATE"){
-			$("#groupNameInput").attr('readonly', true);
-			$("#groupNameInput").addClass("text-dark");	
-			$("#searchUsersInModal").attr('readonly', true);
-			$("#searchUsersInModal").addClass("text-dark");	
+			$("#groupNameInput, #searchUsersInModal").attr('readonly', true);
+			$("#groupNameInput, #searchUsersInModal").addClass("text-dark");	
+			canUsersBeDeleted = false;
 		}
 		$("#groupNameInput").val(chat.chatName);
 		$("#groupDescriptionInput").val(chat.description);
@@ -294,14 +295,10 @@ function getInfoAboutChat(chatId){
 
 function openChatModal(){
         usersInChat =[];
-        $("#searchUsersInModal").attr('readonly', false);
-		$("#searchUsersInModal").removeClass("text-dark");	
-        $("#groupNameInput").attr('readonly', false);
-		$("#groupNameInput").removeClass("text-dark");	
-        $("#groupNameInput").val("");
+        $("#searchUsersInModal, #groupNameInput").attr('readonly', false);
+		$("#searchUsersInModal, #groupNameInput").removeClass("text-dark");	
+        $("#groupNameInput, #searchUsersInModal, #groupDescriptionInput").val("");
         $("#selectedUsers").text("");
-        $("#searchUsersInModal").val("");
-        $("#groupDescriptionInput").val("");
         $('#createGroupModal').modal('show');
 }
 
@@ -329,8 +326,7 @@ function createChatHandler(){
 		createGroup("/chat/creation/group", $('#groupNameInput').val(), $('#groupDescriptionInput').val(), usersInChat)
 		usersInChat = [];
 		$("#selectedUsers").text("");
-		$('#groupNameInput').val("");
-	    $('#groupDescriptionInput').val("");
+		$('#groupNameInput, #groupDescriptionInput').val("");
 	    showMessage("You have created the group!", "success-message");
 }
 
@@ -364,6 +360,8 @@ $(document).ready(function () {
 		$("#deleteChatBut").addClass("d-none");
 		$("#createGroupButton").unbind();
 		$("#createGroupButton").text("Create chat")
+		canUsersBeDeleted = true;
+		addToUsersInGroup(usernameOfCurrentUser);
 		$("#createGroupButton").on("click", () => createChatHandler());
     });
     

@@ -37,6 +37,8 @@ import com.chat_app.service.UserService;
 import com.chat_app.service.mapper.ChatMapper;
 import com.chat_app.service.mapper.MessageMapper;
 
+import lombok.extern.slf4j.Slf4j;
+
 @RestController
 public class ChatController {
 
@@ -147,7 +149,6 @@ public class ChatController {
 		if (!chat.getUsersId().contains(user.getId())) {
 			throw new ErrorAPIException(HttpStatus.PROXY_AUTHENTICATION_REQUIRED, "Not enough rights to delete chat");
 		}
-		
 		chatService.deleteChat(chat);
 
 		chatService.deleteAllMessagesByChatId(chatId);
