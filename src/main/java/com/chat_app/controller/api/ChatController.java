@@ -126,6 +126,8 @@ public class ChatController {
 		Chat chat = chatService.createOrUpdateChat(
 				chatMapper.writeDtoToGroup(group, userService.getUserIdByUsername(group.getUsersName()), ChatType.GROUP));
 		
+		
+		
 		sendMessageAboutChatToUsers(chat, group.getUsersName());
 	}
 	

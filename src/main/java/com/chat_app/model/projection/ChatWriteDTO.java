@@ -2,6 +2,8 @@ package com.chat_app.model.projection;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.chat_app.model.enums.ChatType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
