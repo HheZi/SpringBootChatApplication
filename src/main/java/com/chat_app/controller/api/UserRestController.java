@@ -36,21 +36,6 @@ public class UserRestController {
 	@Autowired
 	private UserService userService;
 
-// 	TODO Complete code
-//	@MessageMapping("/app.addUser")
-//	@SendTo("/user/topic")
-//	public User addUser(@Payload User user) {
-//		userService.makeUserOnline(user);
-//		return user;
-//	}
-//	
-//	@MessageMapping("/app.disconnectUser")
-//	@SendTo("/user/topic")
-//	public User disconnectUser(@Payload User user) {
-//		userService.makeUserOffline(user);
-//		return user;
-//	}
-
 	@GetMapping("/{username}")
 	public UserReadDTO getUser(@PathVariable("username") String username) {
 		return userService.getUserByUsername(username);

@@ -17,8 +17,6 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
-TODO.txt
-images/
 
 ### IntelliJ IDEA ###
 .idea

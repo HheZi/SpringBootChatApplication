@@ -44,7 +44,10 @@ public class UserService implements UserDetailsService{
 	
 	@Transactional(readOnly = true)	
 	public List<User> getUserById(List<Integer> id) {
-		return userReposiory.findAllById(id);
+		return userReposiory.findAllById(id)
+				.stream()
+				.peek(User::getUsername)
+				.toList();
 	}
 	
 	@Transactional
@@ -59,7 +62,6 @@ public class UserService implements UserDetailsService{
 	}
 	
 	private void updateUserWithDTO(User user, UpdateUserDTO dto) {
-//		user.setAvatar(dto.getAvatar().get);
 		user.setDescription(dto.getDescription());
 		user.setUsername(dto.getUsername());
 	}
@@ -102,16 +104,6 @@ public class UserService implements UserDetailsService{
 		dto.setPassword(passwordEncoder.encode(dto.getPassword()));
 		
 		userReposiory.save(userMapper.writeDTOToUser(dto));
-	}
-
-	public void makeUserOnline(User user) {
-		user.setStatus(Status.ONLINE);
-		userReposiory.save(user);
-	}
-
-	public void makeUserOffline(User user) {
-		user.setStatus(Status.OFFLINE);
-		userReposiory.save(user);
 	}
 	
 	public static User getAuth() {

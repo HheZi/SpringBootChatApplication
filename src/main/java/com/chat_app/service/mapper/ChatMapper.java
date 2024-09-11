@@ -21,9 +21,6 @@ public class ChatMapper {
 
 	private final String NEW_MESSAGE_URL = "/messages/%s";
 	
-	
-	private final String LAST_MESSAGE_FORMAT = "%s: %s";
-
 	public Chat writeDtoToGroup(ChatWriteDTO dto, List<Integer> usersId, ChatType chatType) {
 		return Chat.builder()
 				.chatName(chatType == ChatType.PRIVATE ? null : dto.getChatName())

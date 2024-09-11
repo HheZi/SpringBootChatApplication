@@ -96,7 +96,7 @@ public class ChatService {
 	}
 	
 	public Chat calcualteChatName(Chat chat) {
-		return calcualteChatName(chat, ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername());
+		return calcualteChatName(chat, UserService.getAuth().getUsername());
 	}
 	
 	public Chat calcualteChatName(Chat chat, String authUser) {
@@ -105,7 +105,7 @@ public class ChatService {
 					.stream()
 					.filter(u -> !u.getUsername().equals(authUser))
 					.findAny()
-					.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "The user is not found"))
+					.orElseThrow(() -> new ErrorAPIException(HttpStatus.INTERNAL_SERVER_ERROR, "Can't calculate name of private chat"))
 					.getUsername());
 		}
 		return chat;

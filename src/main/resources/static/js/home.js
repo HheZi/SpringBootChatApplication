@@ -109,7 +109,6 @@ function deleteMessage(messageId){
 function displayChat(chat){
 	const row = `<div class="group-item" onclick="getChat('${chat.chatId}', '${chat.groupSocketUrl}')" 
 							id="${chat.chatId}">
-		                   <img src="https://via.placeholder.com/40" alt="Group Icon">
 		                   <div class="group-details">
 		                       <div class="group-name" >${chat.chatName}</div>
 		                       <div class="last-message">${chat.lastMessage}</div>
@@ -129,6 +128,7 @@ function getChat(chatId, groupSocketUrl){
 	$(".chat-body").text("");
 	$("#sendBut, #sendInput").prop('disabled', false);
 	$("#chatName").text($("#" + chatId + " .group-name").text());
+	$("#chatName").unbind();
 	$("#chatName").on("click", () => getInfoAboutChat(chatId));
 	$("#deleteChatBut").on("click", () => {
 		$.ajax({
@@ -165,7 +165,6 @@ function searchUsers(e, dropdownClass, inputClass, inModal = false){
                     const item  = `<a ${(inModal) ? `onclick='addToUsersInGroup("${user.username}", false)'` : 
                     			`onclick='getInfoAboutUser("${user.username}")'` } 
                     				class="dropdown-item text-center">
-                        <img src="${user.avatarUrl}" alt="avatar" class="rounded-circle" width="30" height="30">
                         <span class="text-white">${user.username}</span>
                     </a>`;
                     $(dropdownClass).append(item);
@@ -283,7 +282,7 @@ function getInfoAboutChat(chatId){
 		$("#selectedUsers").text("");
 		chat.usersInChat.forEach(username => addToUsersInGroup(username, true));
 		$("#createGroupButton").text("Update chat");
-		
+		$("#createGroupModalLabel").text("Update chat")		
 		$("#createGroupButton").unbind();
 		$("#createGroupButton").on("click", () => updateChatHandler());
 	})
@@ -357,6 +356,7 @@ $(document).ready(function () {
     $('#openModalButton').click(function (e) {
         e.preventDefault();
 		openChatModal();
+		$("#createGroupModalLabel").text("Create new group");	
 		$("#deleteChatBut").addClass("d-none");
 		$("#createGroupButton").unbind();
 		$("#createGroupButton").text("Create chat")
