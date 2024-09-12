@@ -26,7 +26,4 @@ public class UserWriteDTO {
 	@NotBlank(message = "Password must be not blank")
 	@Length(min = 5, message = "Password need have at least 5 characters")
 	private String password;
-	
-	@Nullable
-	private MultipartFile avatar;
 }

@@ -15,7 +15,6 @@ public class UserMapper {
 				.email(dto.getEmail())
 				.username(dto.getUsername())
 				.password(dto.getPassword())
-				.avatar(dto.getAvatar() == null ? "" : dto.getAvatar().getOriginalFilename())
 				.build();
 	}
 	
@@ -25,7 +24,6 @@ public class UserMapper {
 				.username(user.getUsername())
 				.status(user.getStatus())
 				.description(user.getDescription())
-				.avatarUrl(user.getAvatar().isEmpty() ? "" : user.getAvatar())
 				.build();
 	}
 }
