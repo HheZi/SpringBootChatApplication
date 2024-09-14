@@ -48,8 +48,6 @@ public class User implements UserDetails{
 	@Builder.Default
 	private Status status = Status.OFFLINE;
 
-	private String avatar;
-	
 	private String description;
 	
 	@CreatedDate

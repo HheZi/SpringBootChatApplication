@@ -36,6 +36,7 @@ function onChatReceived(resp){
 		$(".chat-body").text("")
 		$("#sendInput, #sendBut").prop("disabled", true)
 		subscriptions.get(chat).unsubscribe();
+		subscriptions.delete(chat);
 		return;
 	}
 	const tag = $("#"+chat.chatId + " .group-details");
@@ -183,6 +184,10 @@ function searchUsers(e, dropdownClass, inputClass, inModal = false){
         
 
 function addToUsersInGroup(usernameToAdd){
+	if(usersInChat.indexOf(usernameToAdd) != -1 ){
+		showMessage("User already contains in chat", "error-message");
+		return;
+	}
 	usersInChat.push(usernameToAdd);
 	const aTag = canUsersBeDeleted && usernameToAdd !== usernameOfCurrentUser 
 		? `<a class="deleteBut"  onclick="deleteUserFromGroup('${usernameToAdd}')">&times;</a>` 
@@ -210,13 +215,6 @@ function deleteUserFromGroup(usernameToDel){
 			}
 		});
 	}
-}
-
-function showMessage(message, idTag){
-	$("#" + idTag).removeClass("d-lg-none").text(message).addClass("show");	
-	setTimeout(function() {
-    	$(".alert").removeClass("show");
-    }, 5000);
 }
 
 function getInfoAboutUser(username){
