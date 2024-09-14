@@ -42,120 +42,39 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 public class ChatController {
 
-	private static final String CHAT_CREATION_URI = "/chat/creation";
-	
-	@Autowired
-	private SimpMessagingTemplate messagingTemplate;
-
 	@Autowired
 	private ChatService chatService;
 
-	@Autowired
-	private UserService userService;
-
-	@Autowired
-	private ChatMapper chatMapper;
-
-	@Autowired
-	private MessageMapper messageMapper;
-
 	@GetMapping("/chat")
 	public List<ChatReadDTO> getAllGroups(@AuthenticationPrincipal User authUser) {
-		return chatService.getAllChatsByUsername(authUser.getId())
-				.stream()
-				.map(chatMapper::groupToReadDto)
-				.toList();
+		return chatService.getAllChatsByUsername(authUser.getId());
 	}
 
 	@GetMapping("/chat/{chatId}")
 	public ChatToUpdateDTO getChatForUpdate(@PathVariable("chatId") String chatId) {
-		Chat chat = chatService.findChatByChatId(chatId);
-		List<String> list = userService.getUserById(chat.getUsersId())
-			.stream()
-			.map(User::getUsername)
-			.toList();
-		return chatMapper.chatToChatUpdateDTO(chat, list);
+		return chatService.getChatToUpdate(chatId);
 	}
 	
 	@PutMapping("/chat/{chatId}")
 	public ResponseEntity<?> updateChat(@PathVariable("chatId") String chatId, @RequestBody ChatWriteDTO dto){
-		Chat chatByDto = chatService.createOrUpdateChat(
-				chatService.updateChatByDto(
-						chatService.findChatByChatId(chatId), dto, userService.getUserIdByUsername(dto.getUsersName())));
 		
-		sendMessageAboutChatToUsers(chatByDto, dto.getUsersName());
+		chatService.updateChat(chatId, dto);
 		
 		return  ResponseEntity.status(HttpStatus.CREATED).build();
 	}
-	
-	private void sendMessageAboutChatToUsers(Chat chat, List<String> users) {
-		users.forEach(t -> {
-			messagingTemplate.convertAndSendToUser(t, CHAT_CREATION_URI, chat.getChatType() == ChatType.PRIVATE ?
-					chatMapper.groupToReadDto(chatService.calcualteChatName(chat, t)) : chatMapper.groupToReadDto(chat));
-		});
-	}
-	
-	private void sendMessageAboutChatToUsers(String message, List<String> users) {
-		users.forEach(t -> {
-			messagingTemplate.convertAndSendToUser(t, CHAT_CREATION_URI, message);
-		});
-	}
+
 	
 	@PutMapping("/chat/{chatId}/{username}")
-	public ResponseEntity<?> kickUserFromChat(@PathVariable("chatId") String chatId, @PathVariable("username") String username, 
-				@AuthenticationPrincipal User user){
-		Chat chat = chatService.findChatByChatId(chatId);
-
-		Integer userId = userService.getIdByUsername(username);
+	public ResponseEntity<?> kickUserFromChat(@PathVariable("chatId") String chatId, @PathVariable("username") String username){
 		
-		if (!chat.getUsersId().contains(user.getId())) {
-			throw new ErrorAPIException(HttpStatus.PROXY_AUTHENTICATION_REQUIRED, "Not enough rights to kick user");
-		}
-		
-		chat.getUsersId().remove(userId);
-		
-		chatService.createOrUpdateChat(chat);
-		
-		sendMessageAboutChatToUsers(chatId, List.of(username));
+		chatService.kickUserFromChat(chatId, username);
 		
 		return ok().build();
 	}
 	
-	@MessageMapping("/chat/creation/group")
-	public void createGroupChat(@Payload ChatWriteDTO group) {
-		Chat chat = chatService.createOrUpdateChat(
-				chatMapper.writeDtoToGroup(group, userService.getUserIdByUsername(group.getUsersName()), ChatType.GROUP));
-		
-		
-		
-		sendMessageAboutChatToUsers(chat, group.getUsersName());
-	}
-	
-	@MessageMapping("/chat/creation/private")
-	public void createPrivateChat(@Payload ChatWriteDTO privateChat) {
-		List<Integer> usersId = userService.getUserIdByUsername(privateChat.getUsersName());
-		
-		if(!chatService.isPrivateChatExists(usersId.get(0), usersId.get(1))) {
-			Chat chat = chatService.createOrUpdateChat(chatMapper.writeDtoToGroup(privateChat, usersId, ChatType.PRIVATE));
-			
-			sendMessageAboutChatToUsers(chat, privateChat.getUsersName());
-			
-		}
-		
-	}
-	
 	@DeleteMapping("/chat/{chatId}")
 	public ResponseEntity<?> deleteChat(@PathVariable("chatId") String chatId, @AuthenticationPrincipal User user){
-		Chat chat = chatService.findChatByChatId(chatId);
-		
-		if (!chat.getUsersId().contains(user.getId())) {
-			throw new ErrorAPIException(HttpStatus.PROXY_AUTHENTICATION_REQUIRED, "Not enough rights to delete chat");
-		}
-		chatService.deleteChat(chat);
-
-		chatService.deleteAllMessagesByChatId(chatId);
-		
-		sendMessageAboutChatToUsers(chat.getChatId(), userService.getUserById(chat.getUsersId()).stream().map(User::getUsername).toList());
+		chatService.deleteChat(chatId);
 		
 		return ok().build();
 	}
@@ -163,27 +82,6 @@ public class ChatController {
 
 	@GetMapping("/chat/messages/{chatId}")
 	public List<MessageReadDTO> getMessages(@PathVariable("chatId") String chatId) {
-		Chat chat = chatService.findChatByChatId(chatId);
-		List<Message> messages = chatService.findMessagesByChatId(chat.getChatId());
-		List<User> usersById = userService.getUserById(chat.getUsersId());
-
-		return messages.stream()
-			   .map(t -> messageMapper.messageToReadDto(t, usersById, chatId))
-			   .toList();
-	}
-
-	@MessageMapping("/messages/{chatId}/{messageId}")
-	@SendTo("/messages/{chatId}")
-	public String deleteMessageAndReturnId(@DestinationVariable("messageId") String messageId) {
-		return chatService.deleteMessageById(messageId);
-	}
-	
-	@MessageMapping("/messages/{chatId}")
-	@SendTo("/messages/{chatId}")
-	public MessageReadDTO sendMessages(@Payload MessageWriteDTO dto, @DestinationVariable("chatId") String chatId) {
-		return messageMapper.messageToReadDto(
-				chatService.saveMessage(
-						messageMapper.writeDtoToMessage(dto, userService.getIdByUsername(dto.getSender()), chatId)),
-				dto.getSender(), chatId);
+		return chatService.getMessages(chatId);
 	}
 }

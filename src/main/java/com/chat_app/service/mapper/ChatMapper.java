@@ -21,7 +21,7 @@ public class ChatMapper {
 
 	private final String NEW_MESSAGE_URL = "/messages/%s";
 	
-	public Chat writeDtoToGroup(ChatWriteDTO dto, List<Integer> usersId, ChatType chatType) {
+	public Chat writeDtoToChat(ChatWriteDTO dto, List<Integer> usersId, ChatType chatType) {
 		return Chat.builder()
 				.chatName(chatType == ChatType.PRIVATE ? null : dto.getChatName())
 				.chatId(UUID.randomUUID().toString())
@@ -31,7 +31,7 @@ public class ChatMapper {
 				.build();
 	}
 
-	public ChatReadDTO groupToReadDto(Chat entity) {
+	public ChatReadDTO chatToReadDto(Chat entity) {
 		return ChatReadDTO.builder()
 				.chatName(entity.getChatName())
 				.groupSocketUrl(String.format(NEW_MESSAGE_URL, entity.getChatId()))
