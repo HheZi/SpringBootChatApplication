@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.chat_app.exception.ErrorAPIException;
@@ -40,22 +41,23 @@ import com.chat_app.service.mapper.MessageMapper;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
+@RequestMapping("/chat")
 public class ChatController {
 
 	@Autowired
 	private ChatService chatService;
 
-	@GetMapping("/chat")
+	@GetMapping()
 	public List<ChatReadDTO> getAllGroups(@AuthenticationPrincipal User authUser) {
 		return chatService.getAllChatsByUsername(authUser.getId());
 	}
 
-	@GetMapping("/chat/{chatId}")
+	@GetMapping("/{chatId}")
 	public ChatToUpdateDTO getChatForUpdate(@PathVariable("chatId") String chatId) {
 		return chatService.getChatToUpdate(chatId);
 	}
 	
-	@PutMapping("/chat/{chatId}")
+	@PutMapping("/{chatId}")
 	public ResponseEntity<?> updateChat(@PathVariable("chatId") String chatId, @RequestBody ChatWriteDTO dto){
 		
 		chatService.updateChat(chatId, dto);
@@ -64,7 +66,7 @@ public class ChatController {
 	}
 
 	
-	@PutMapping("/chat/{chatId}/{username}")
+	@PutMapping("/{chatId}/{username}")
 	public ResponseEntity<?> kickUserFromChat(@PathVariable("chatId") String chatId, @PathVariable("username") String username){
 		
 		chatService.kickUserFromChat(chatId, username);
@@ -72,15 +74,15 @@ public class ChatController {
 		return ok().build();
 	}
 	
-	@DeleteMapping("/chat/{chatId}")
-	public ResponseEntity<?> deleteChat(@PathVariable("chatId") String chatId, @AuthenticationPrincipal User user){
+	@DeleteMapping("/{chatId}")
+	public ResponseEntity<?> deleteChat(@PathVariable("chatId") String chatId){
 		chatService.deleteChat(chatId);
 		
 		return ok().build();
 	}
 	
 
-	@GetMapping("/chat/messages/{chatId}")
+	@GetMapping("/messages/{chatId}")
 	public List<MessageReadDTO> getMessages(@PathVariable("chatId") String chatId) {
 		return chatService.getMessages(chatId);
 	}

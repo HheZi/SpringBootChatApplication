@@ -44,19 +44,22 @@ public class ChatService {
 	private MessageMapper messageMapper;
 	
 	@Autowired
-	private WebSocketController controller;
+	private WebSocketController webSocketController;
 	
 	@Transactional(readOnly = true)
 	public List<ChatReadDTO> getAllChatsByUsername(Integer usernameId) {
-		return chatRepository.findByUsersIdWithLastMessage(usernameId).stream().peek(this::calcualteChatName)
-				.map(chatMapper::chatToReadDto).toList();
+		return chatRepository.findByUsersIdWithLastMessage(usernameId)
+				.stream()
+				.peek(this::calcualteChatName)
+				.map(chatMapper::chatToReadDto)
+				.toList();
 	}
 
 	@Transactional(readOnly = true)
 	public List<MessageReadDTO> getMessages(String chatId) {
-		Chat chat = chatRepository.findByChatId(chatId)
+		Chat chat = chatRepository.findById(chatId)
 				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "Chat is not found"));
-		List<Message> messages = messageRepository.findByChatId(chat.getChatId());
+		List<Message> messages = messageRepository.findByChatId(chat.getId());
 		List<User> usersById = userService.getUserById(chat.getUsersId());
 
 		return messages.stream()
@@ -65,7 +68,7 @@ public class ChatService {
 	}
 
 	public ChatToUpdateDTO getChatToUpdate(String chatId) {
-		Chat chat = chatRepository.findByChatId(chatId)
+		Chat chat = chatRepository.findById(chatId)
 				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "Chat is not found"));
 		return chatMapper.chatToChatUpdateDTO(chat,
 				userService.getUserById(chat.getUsersId()).stream().map(User::getUsername).toList());
@@ -73,7 +76,7 @@ public class ChatService {
 
 	@Transactional
 	public void updateChat(String chatId, ChatWriteDTO dto) {
-		controller.sendMessageAboutChatToUsers(chatMapper
+		webSocketController.sendMessageAboutChatToUsers(chatMapper
 				.chatToReadDto(calcualteChatName(
 						chatRepository.save(updateChatByDto(findChatByChatId(chatId), dto,
 								userService.getUserIdByUsername(dto.getUsersName()))))), dto.getUsersName());
@@ -81,9 +84,10 @@ public class ChatService {
 	
 	@Transactional
 	public void kickUserFromChat(String chatId, String userToKick) { 
-		Chat chat = findChatByChatId(chatId);
+		Chat chat = chatRepository.findById(chatId)
+				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "Chat is not found"));
 
-		Integer userId = userService.getIdByUsername(UserService.getAuth().getUsername());
+		Integer userId = userService.getIdByUsername(userToKick);
 		
 		if (!chat.getUsersId().contains(UserService.getAuth().getId())) {
 			throw new ErrorAPIException(HttpStatus.PROXY_AUTHENTICATION_REQUIRED, "Not enough rights to kick user");
@@ -93,7 +97,7 @@ public class ChatService {
 		
 		chatRepository.save(chat);
 		
-		controller.sendMessageAboutChatToUsers(userId, List.of(userToKick));
+		webSocketController.sendMessageAboutChatToUsers(chatId, List.of(userToKick));
 	}
 	
 	@Transactional
@@ -109,7 +113,7 @@ public class ChatService {
 	
 	@Transactional
 	public void deleteChat(String chatId) {
-		Chat chat = chatRepository.findByChatId(chatId)
+		Chat chat = chatRepository.findById(chatId)
 				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "Chat is not found"));
 		
 		if (!chat.getUsersId().contains(UserService.getAuth().getId())) {
@@ -119,19 +123,13 @@ public class ChatService {
 
 		messageRepository.deleteByChatId(chatId);
 		
-		controller.sendMessageAboutChatToUsers(chat.getChatId(), userService.getUserById(chat.getUsersId()).stream().map(User::getUsername).toList());
+		webSocketController.sendMessageAboutChatToUsers(chat.getId().toString(), userService.getUserById(chat.getUsersId()).stream().map(User::getUsername).toList());
 	}
 	
 	@Transactional(readOnly = true)
 	public Chat findChatByChatId(String chatId) {
-		return calcualteChatName(chatRepository.findByChatId(chatId)
+		return calcualteChatName(chatRepository.findById(chatId)
 				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "Chat is not found!")));
-	}
-
-	@Transactional(readOnly = true)
-	public String findChatByChatName(String chatName) {
-		return chatRepository.findByChatName(chatName).map(t -> t.getId())
-				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "Chat is not found!"));
 	}
 
 	@Transactional(readOnly = true)
@@ -162,7 +160,14 @@ public class ChatService {
 
 	@Transactional
 	public String deleteMessageById(String id) {
-		messageRepository.deleteById(id);
+		Message message = messageRepository.findById(id)
+				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "The message is not found"));
+		
+		if (message.getSenderId() != UserService.getAuth().getId()) {
+			throw new ErrorAPIException(HttpStatus.PROXY_AUTHENTICATION_REQUIRED, "Not enough rights to delete the message");
+		}
+		
+		messageRepository.delete(message);
 		return id;
 	}
 

@@ -24,7 +24,6 @@ public class ChatMapper {
 	public Chat writeDtoToChat(ChatWriteDTO dto, List<Integer> usersId, ChatType chatType) {
 		return Chat.builder()
 				.chatName(chatType == ChatType.PRIVATE ? null : dto.getChatName())
-				.chatId(UUID.randomUUID().toString())
 				.usersId(usersId)
 				.chatType(chatType)
 				.description(dto.getDescription())
@@ -34,17 +33,17 @@ public class ChatMapper {
 	public ChatReadDTO chatToReadDto(Chat entity) {
 		return ChatReadDTO.builder()
 				.chatName(entity.getChatName())
-				.groupSocketUrl(String.format(NEW_MESSAGE_URL, entity.getChatId()))
+				.groupSocketUrl(String.format(NEW_MESSAGE_URL, entity.getId()))
 				.lastMessage(entity.getLastMessage() == null || entity.getLastMessage().isEmpty() 
 							? "" : entity.getLastMessage().get(0).getContent())
-				.chatId(entity.getChatId())
+				.chatId(entity.getId().toString())
 				.build();
 	}
 	
 	public ChatToUpdateDTO chatToChatUpdateDTO(Chat chat, List<String> users) {
 		return ChatToUpdateDTO.builder()
 				.chatName(chat.getChatName())
-				.chatId(chat.getChatId())
+				.chatId(chat.getId().toString())
 				.chatType(chat.getChatType())
 				.description(chat.getDescription())
 				.usersInChat(users)

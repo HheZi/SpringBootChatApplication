@@ -2,6 +2,7 @@ package com.chat_app.model;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -25,12 +26,10 @@ import lombok.ToString;
 public class Chat {
 	
 	@Id
-	private String id;
+	private ObjectId id;
 	
 	private String chatName;
 	
-	private String chatId;
-		
 	private List<Integer> usersId;
 	
 	private List<Message> lastMessage;

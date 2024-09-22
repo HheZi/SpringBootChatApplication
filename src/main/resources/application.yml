@@ -5,7 +5,7 @@ spring:
       database: chatApplication
       uri: mongodb://localhost:27017/
   datasource:
-    url: jdbc:postgresql://localhost:5432/chatapplication
+    url: jdbc:postgresql://localhost:5432/ChatApplication
     password: postgres
     username: postgres
 logging:

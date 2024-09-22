@@ -10,15 +10,17 @@ import com.chat_app.model.Message;
 
 import java.util.List;
 import java.util.Optional;
+import org.bson.types.ObjectId;
+
 
 
 @Repository
 public interface MessageRepository extends MongoRepository<Message, String>{
 	
-	List<Message> findByChatId(String chatId);
-	
 	@Query(value = "{chatName: ?0}", sort = "{timestamp: -1}")
 	Optional<Message> findLastMessageByTimestamp(String groupName);
 	
 	public void deleteByChatId(String chatId);
+	
+	public List<Message> findByChatId(ObjectId chatId);
 }

@@ -2,6 +2,7 @@ package com.chat_app.model;
 
 import java.time.Instant;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -28,7 +29,7 @@ public class Message {
 
 	private Integer senderId;
 	
-	private String chatId;
+	private ObjectId chatId;
 	
 	private Instant timestamp;
 	

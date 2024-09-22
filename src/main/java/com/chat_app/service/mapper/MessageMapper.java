@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,7 @@ public class MessageMapper{
 	public Message writeDtoToMessage(MessageWriteDTO dto, Integer senderId, String chatId) {
 		return Message.builder()
 				.content(dto.getContent())
-				.chatId(chatId)
+				.chatId(new ObjectId(chatId))
 				.senderId(senderId)
 				.timestamp(Instant.now())
 				.build();
