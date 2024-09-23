@@ -8,7 +8,4 @@ spring:
     url: jdbc:postgresql://localhost:5432/ChatApplication
     password: postgres
     username: postgres
-logging:
-  level:
-    web: debug
 server.error.include-stacktrace: never

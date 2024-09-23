@@ -34,6 +34,7 @@ import com.chat_app.model.projection.ChatWriteDTO;
 import com.chat_app.model.projection.MessageReadDTO;
 import com.chat_app.model.projection.MessageWriteDTO;
 import com.chat_app.service.ChatService;
+import com.chat_app.service.MessageService;
 import com.chat_app.service.UserService;
 import com.chat_app.service.mapper.ChatMapper;
 import com.chat_app.service.mapper.MessageMapper;
@@ -47,6 +48,9 @@ public class ChatController {
 	@Autowired
 	private ChatService chatService;
 
+	@Autowired
+	private MessageService messageService;
+	
 	@GetMapping()
 	public List<ChatReadDTO> getAllGroups(@AuthenticationPrincipal User authUser) {
 		return chatService.getAllChatsByUsername(authUser.getId());
@@ -84,6 +88,6 @@ public class ChatController {
 
 	@GetMapping("/messages/{chatId}")
 	public List<MessageReadDTO> getMessages(@PathVariable("chatId") String chatId) {
-		return chatService.getMessages(chatId);
+		return messageService.getMessages(chatId);
 	}
 }

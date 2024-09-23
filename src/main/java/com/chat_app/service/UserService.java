@@ -43,7 +43,7 @@ public class UserService implements UserDetailsService{
 	}
 	
 	@Transactional(readOnly = true)	
-	public List<User> getUserById(List<Integer> id) {
+	protected List<User> getUserById(List<Integer> id) {
 		return userReposiory.findAllById(id)
 				.stream()
 				.peek(User::getUsername)
@@ -74,7 +74,7 @@ public class UserService implements UserDetailsService{
 	}
 	
 	@Transactional(readOnly = true)	
-	public List<Integer> getUserIdByUsername(List<String> usernames) {
+	protected List<Integer> getUserIdByUsername(List<String> usernames) {
 		return userReposiory
 				.getByUsernameIn(usernames)
 				.stream()
@@ -92,7 +92,7 @@ public class UserService implements UserDetailsService{
 	}
 	
 	@Transactional(readOnly = true)	
-	public Integer getIdByUsername(String username) {
+	protected Integer getIdByUsername(String username) {
 		return userReposiory
 				.findByUsername(username)
 				.map(t -> t.getId())

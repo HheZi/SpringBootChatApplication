@@ -16,6 +16,7 @@ import com.chat_app.model.projection.ChatWriteDTO;
 import com.chat_app.model.projection.MessageReadDTO;
 import com.chat_app.model.projection.MessageWriteDTO;
 import com.chat_app.service.ChatService;
+import com.chat_app.service.MessageService;
 
 @Controller
 public class WebSocketController {
@@ -28,6 +29,9 @@ public class WebSocketController {
 	@Autowired
 	@Lazy
 	private ChatService chatService;
+	
+	@Autowired
+	private MessageService messageService;
 	
 	public void sendMessageAboutChatToUsers(Object message, List<String> users) {
 		users.forEach(t -> {
@@ -48,12 +52,12 @@ public class WebSocketController {
 	@MessageMapping("/messages/{chatId}/{messageId}")
 	@SendTo("/messages/{chatId}")
 	public String deleteMessageAndReturnId(@DestinationVariable("messageId") String messageId) {
-		return chatService.deleteMessageById(messageId);
+		return messageService.deleteMessageById(messageId);
 	}
 	
 	@MessageMapping("/messages/{chatId}")
 	@SendTo("/messages/{chatId}")
 	public MessageReadDTO sendMessages(@Payload MessageWriteDTO dto, @DestinationVariable("chatId") String chatId) {
-		return chatService.sendMessage(dto, chatId);
+		return messageService.sendMessage(dto, chatId);
 	}
 }

@@ -4,10 +4,4 @@
 	left: 0;
 	margin: 10px;
 	z-index: 1050;
-	transform: translateX(-150%);
-	transition: transform 1.0s ease-in-out;
-}
-
-.alert.show {
-	transform: translateX(0);
 }

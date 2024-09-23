@@ -1,6 +1,6 @@
 function showMessage(message, idTag){
-	$("#" + idTag).removeClass("d-lg-none").text(message).addClass("show");	
+    $("#" + idTag).text(message).slideDown("slow");
 	setTimeout(function() {
-    	$(".alert").removeClass("show");
+    	$("#" + idTag).slideUp("slow");
     }, 5000);
 }

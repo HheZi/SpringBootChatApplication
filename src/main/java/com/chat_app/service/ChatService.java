@@ -32,19 +32,16 @@ public class ChatService {
 	private ChatRepository chatRepository;
 
 	@Autowired
-	private MessageRepository messageRepository;
-
-	@Autowired
-	private UserService userService;
-
-	@Autowired
 	private ChatMapper chatMapper;
 
 	@Autowired
-	private MessageMapper messageMapper;
+	private WebSocketController webSocketController;
+
+	@Autowired
+	private UserService userService;
 	
 	@Autowired
-	private WebSocketController webSocketController;
+	private MessageService messageService;
 	
 	@Transactional(readOnly = true)
 	public List<ChatReadDTO> getAllChatsByUsername(Integer usernameId) {
@@ -55,17 +52,6 @@ public class ChatService {
 				.toList();
 	}
 
-	@Transactional(readOnly = true)
-	public List<MessageReadDTO> getMessages(String chatId) {
-		Chat chat = chatRepository.findById(chatId)
-				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "Chat is not found"));
-		List<Message> messages = messageRepository.findByChatId(chat.getId());
-		List<User> usersById = userService.getUserById(chat.getUsersId());
-
-		return messages.stream()
-			   .map(t -> messageMapper.messageToReadDto(t, usersById, chatId))
-			   .toList();
-	}
 
 	public ChatToUpdateDTO getChatToUpdate(String chatId) {
 		Chat chat = chatRepository.findById(chatId)
@@ -117,13 +103,14 @@ public class ChatService {
 				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "Chat is not found"));
 		
 		if (!chat.getUsersId().contains(UserService.getAuth().getId())) {
-			throw new ErrorAPIException(HttpStatus.PROXY_AUTHENTICATION_REQUIRED, "Not enough rights to delete the chat");
+			throw new ErrorAPIException(HttpStatus.CONFLICT, "Not enough rights to delete the chat");
 		}
 		chatRepository.delete(chat);
 
-		messageRepository.deleteByChatId(chatId);
+		messageService.deleteAllMessagesByChatId(chatId);
 		
-		webSocketController.sendMessageAboutChatToUsers(chat.getId().toString(), userService.getUserById(chat.getUsersId()).stream().map(User::getUsername).toList());
+		webSocketController.sendMessageAboutChatToUsers(chat.getId().toString(),
+				userService.getUserById(chat.getUsersId()).stream().map(User::getUsername).toList());
 	}
 	
 	@Transactional(readOnly = true)
@@ -139,15 +126,7 @@ public class ChatService {
 			 throw new ErrorAPIException(HttpStatus.CONFLICT, "The chat already exists");
 		 } 
 	}
-	
-	@Transactional
-	public MessageReadDTO sendMessage(MessageWriteDTO dto, String chatId) {
-		return messageMapper.messageToReadDto(
-				messageRepository.save(
-						messageMapper.writeDtoToMessage(dto, userService.getIdByUsername(dto.getSender()), chatId)),
-				dto.getSender(), chatId);
-	}
-	
+
 	public Chat updateChatByDto(Chat chat, ChatWriteDTO dto, List<Integer> list) {
 		chat.setDescription(dto.getDescription());
 		if (chat.getChatType() == ChatType.GROUP) {
@@ -158,18 +137,6 @@ public class ChatService {
 		return chat;
 	}
 
-	@Transactional
-	public String deleteMessageById(String id) {
-		Message message = messageRepository.findById(id)
-				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "The message is not found"));
-		
-		if (message.getSenderId() != UserService.getAuth().getId()) {
-			throw new ErrorAPIException(HttpStatus.PROXY_AUTHENTICATION_REQUIRED, "Not enough rights to delete the message");
-		}
-		
-		messageRepository.delete(message);
-		return id;
-	}
 
 	private Chat calcualteChatName(Chat chat) {
 		if (chat.getChatType() == ChatType.PRIVATE) {
