@@ -3,6 +3,7 @@ package com.chat_app.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -16,7 +17,7 @@ import com.chat_app.model.enums.ChatType;
 import com.chat_app.model.projection.ChatReadDTO;
 
 @Repository
-public interface ChatRepository extends MongoRepository<Chat, String>{
+public interface ChatRepository extends MongoRepository<Chat, ObjectId>{
 
 	@Aggregation(pipeline = {
 			"{$match: {usersId: ?0}}",

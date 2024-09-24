@@ -2,6 +2,7 @@ package com.chat_app.service;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.aggregation.ArrayOperators.IsArray;
 import org.springframework.http.HttpStatus;
@@ -54,7 +55,7 @@ public class ChatService {
 
 
 	public ChatToUpdateDTO getChatToUpdate(String chatId) {
-		Chat chat = chatRepository.findById(chatId)
+		Chat chat = chatRepository.findById(new ObjectId(chatId))
 				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "Chat is not found"));
 		return chatMapper.chatToChatUpdateDTO(chat,
 				userService.getUserById(chat.getUsersId()).stream().map(User::getUsername).toList());
@@ -70,7 +71,7 @@ public class ChatService {
 	
 	@Transactional
 	public void kickUserFromChat(String chatId, String userToKick) { 
-		Chat chat = chatRepository.findById(chatId)
+		Chat chat = chatRepository.findById(new ObjectId(chatId))
 				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "Chat is not found"));
 
 		Integer userId = userService.getIdByUsername(userToKick);
@@ -99,7 +100,7 @@ public class ChatService {
 	
 	@Transactional
 	public void deleteChat(String chatId) {
-		Chat chat = chatRepository.findById(chatId)
+		Chat chat = chatRepository.findById(new ObjectId(chatId))
 				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "Chat is not found"));
 		
 		if (!chat.getUsersId().contains(UserService.getAuth().getId())) {
@@ -115,7 +116,7 @@ public class ChatService {
 	
 	@Transactional(readOnly = true)
 	public Chat findChatByChatId(String chatId) {
-		return calcualteChatName(chatRepository.findById(chatId)
+		return calcualteChatName(chatRepository.findById(new ObjectId(chatId))
 				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "Chat is not found!")));
 	}
 

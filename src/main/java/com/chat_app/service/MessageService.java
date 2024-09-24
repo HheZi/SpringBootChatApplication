@@ -58,10 +58,6 @@ public class MessageService {
 		Message message = messageRepository.findById(id)
 				.orElseThrow(() -> new ErrorAPIException(HttpStatus.NOT_FOUND, "The message is not found"));
 		
-		if (message.getSenderId() != UserService.getAuth().getId()) {
-			throw new ErrorAPIException(HttpStatus.CONFLICT, "Not enough rights to delete the message");
-		}
-		
 		messageRepository.delete(message);
 		return id;
 	}

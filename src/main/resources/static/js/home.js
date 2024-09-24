@@ -310,10 +310,10 @@ function updateChatHandler(){
 				}),
 				contentType: "application/json",
 				dataType: "json",
-				 success: function() {
-				    showMessage("You have update the chat", "success-message")
-				 },
+				success: function() {
+				}
 			})
+			showMessage("You have update the chat", "success-message")
 }
 
 function createChatHandler(){
