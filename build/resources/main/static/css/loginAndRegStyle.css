@@ -1,0 +1,31 @@
+body {
+	background-color: #2e1a47;
+	color: #ffffff;
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.card {
+	background-color: #4b2c65;
+	border: none;
+	width: 100%;
+	max-width: 400px;
+}
+
+.form-control {
+	background-color: #6a4c7e;
+	border: 1px solid #8d66a3;
+	color: #ffffff;
+}
+
+.btn-primary {
+	background-color: #8d66a3;
+	border: none;
+}
+
+.btn-primary:hover {
+	background-color: #a584b3;
+}
+

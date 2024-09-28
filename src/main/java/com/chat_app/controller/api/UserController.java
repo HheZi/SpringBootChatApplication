@@ -3,7 +3,6 @@ package com.chat_app.controller.api;
 import java.security.Principal;
 import java.util.List;
 
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

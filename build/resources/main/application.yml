@@ -1,0 +1,13 @@
+spring:
+  application.name: Spring_Boot_Chat_Application
+  data:
+    mongodb:
+      database: chatApplication
+      uri: mongodb://localhost:27017/
+  datasource:
+    url: jdbc:postgresql://localhost:5432/chatapplication
+    driver-class-name: org.postgresql.Driver
+    password: postgres
+    username: postgres
+  jpa.hibernate.ddl-auto: create
+server.error.include-stacktrace: never

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Page</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/loginAndRegStyle.css" rel="stylesheet">
+    <link href="/css/alertStyle.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+    <div th:replace="~{fragments::alerts}"></div>
+    <div class="card p-4">
+        <div class="card-body">
+            <h3 class="card-title text-center mb-4">Register</h3>
+            <form id="form">
+                <label for="username">Username</label>
+                <input type="text" class="form-control form-group" id="username" name="username" required>
+
+                <label for="email">Email address</label>
+                <input type="email" class="form-control form-group" id="email" name="email" required>
+
+                <label for="password">Password</label>
+                <input type="password" class="form-control form-group" id="password" name="password" required>
+                
+                <button type="submit" class="btn btn-primary btn-block">Register</button>
+                <div class="text-center mt-3">
+                    <a href="/login" class="link-primary">Already have an account?</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script type="text/javascript" src="/js/registration.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+services:
+  postgres_db:
+    container_name: postgres_app_db
+    image: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init_script.sql:/docker-entrypoint-initdb.d/init_script.sql 
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRESS_USER=postgres
+      - POSTGRES_DB=ChatApplication
+    ports:
+      - 5432:5432
+    networks:
+      - chat-application-network
+
+  mongo_db:
+    container_name: mongo_app_db
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - mongoData:/data/db 
+    networks:
+      - chat-application-network
+
+  api:
+    build: .
+    container_name: api
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres_db
+      - mongo_db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres_app_db:5432/ChatApplication
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo_app_db:27017/chatApplication
+    networks:
+      - chat-application-network
+
+volumes:
+  mongoData:
+  pgdata:
+networks:
+  chat-application-network:
+    name: chat-application-network
+    driver: bridge
+    
