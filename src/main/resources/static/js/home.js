@@ -144,7 +144,7 @@ function getChat(chatId, groupSocketUrl){
 	});
 	[currentChatId, currentChatUrl] = [chatId, groupSocketUrl];
 	
-	$.get(`/chat`+currentChatUrl)
+	$.get(currentChatUrl)
 	.done((data) =>{
 		data.forEach((message) => {
 			displayMessage(message)

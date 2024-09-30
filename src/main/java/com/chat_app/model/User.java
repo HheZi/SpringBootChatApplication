@@ -11,7 +11,6 @@ import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.chat_app.model.enums.Status;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,6 +18,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Table("users")
 @EqualsAndHashCode
@@ -27,6 +27,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
+@ToString
 public class User implements UserDetails{
 	
 	private static final long serialVersionUID = -1359234059078546653L;
@@ -45,9 +46,6 @@ public class User implements UserDetails{
 	@Builder.Default
 	private Boolean isNonLocked = true;
 	
-	@Builder.Default
-	private Status status = Status.OFFLINE;
-
 	private String description;
 	
 	@CreatedDate

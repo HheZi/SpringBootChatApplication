@@ -22,7 +22,6 @@ public class UserMapper {
 		return UserReadDTO.builder()
 				.email(user.getEmail())
 				.username(user.getUsername())
-				.status(user.getStatus())
 				.description(user.getDescription())
 				.build();
 	}

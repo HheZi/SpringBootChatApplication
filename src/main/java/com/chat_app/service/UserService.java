@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.chat_app.exception.ErrorAPIException;
 import com.chat_app.model.Chat;
 import com.chat_app.model.User;
-import com.chat_app.model.enums.Status;
 import com.chat_app.model.projection.UpdateUserDTO;
 import com.chat_app.model.projection.UserReadDTO;
 import com.chat_app.model.projection.UserWriteDTO;
@@ -100,10 +99,10 @@ public class UserService implements UserDetailsService{
 	}
 	
 	@Transactional
-	public void saveUser(UserWriteDTO dto) {
+	public User saveUser(UserWriteDTO dto) {
 		dto.setPassword(passwordEncoder.encode(dto.getPassword()));
 		
-		userReposiory.save(userMapper.writeDTOToUser(dto));
+		return userReposiory.save(userMapper.writeDTOToUser(dto));
 	}
 	
 	public static User getAuth() {

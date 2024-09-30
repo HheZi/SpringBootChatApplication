@@ -1,13 +1,21 @@
 package com.chat_app.model.projection;
 
-import com.chat_app.model.enums.Status;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.Value;
 
-@Value
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@EqualsAndHashCode
 @Builder
 public class UserReadDTO {
 
@@ -15,10 +23,6 @@ public class UserReadDTO {
 
 	private String username;
 	
-	@JsonFormat(shape = Shape.STRING)
-	private Status status;
-
 	private String description;
 	
-	private String avatarUrl;
 }

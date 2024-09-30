@@ -1,9 +1,7 @@
 package com.chat_app.controller.api;
 
-import java.security.Principal;
 import java.util.List;
 
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +24,6 @@ import com.chat_app.model.projection.UpdateUserDTO;
 import com.chat_app.model.projection.UserReadDTO;
 import com.chat_app.model.projection.UserWriteDTO;
 import com.chat_app.service.UserService;
-
-import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/users")

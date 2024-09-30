@@ -33,13 +33,18 @@ git clone https://github.com/HheZi/SpringBootChatApplication
 2. Navigate to the project directory:
 
 ```bash
-cd Bookstore
+cd SpringBootChatApplication
 ```
 
-3. Compile the source code:
+3. Use Docker Compose:
 
 ```bash
-javac -d bin src/*.java
+docker compose up 
+```
+
+4. Or if you don't have a docker you can just run the jar file in [build folder](build/libs/) <ins>(Before this, you need to start the MongoDB and PostgreSQL databases.)</ins>
+```bash
+java -jar build/libs/Spring_Boot_Chat_Application-1.0.0.jar
 ```
 
 ## Contributing
