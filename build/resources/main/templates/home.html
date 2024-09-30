@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat Application</title>
+<link
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+	rel="stylesheet">
+<link href="/css/homeStyle.css" rel="stylesheet">
+<link href="/css/alertStyle.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script
+	src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+	<div class="container-fluid">
+		<div th:replace="~{fragments::alerts}"></div>
+		<div class="row h-100">
+			<div class="col-3 sidebar">
+				<div class="mb-3" id="searchUsersContainer">
+					<div class="d-flex align-items-center">
+						<input type="text" id="searchUsers"
+							class="form-control search-input" placeholder="Search users">
+						<a class="deleteBut d-none ml-2" id="clearUsersDropdown">X</a>
+					</div>
+					<div class="search-dropdown" id="searchDropdown"></div>
+				</div>
+				<h4>Groups</h4>
+				<div id="group-container"></div>
+				<div class="m-3" id="newGroupContainer">
+					<button class="btn btn-link" id="openModalButton">Create
+						new group</button>
+					<div id="usernameProfileContainer" >
+						<h5 id="username" class="mt-2"></h5>
+					</div>
+				</div>
+			</div>
+			<div class="col-9 chat">
+				<div class="chat-header">
+					<h4 id="chatName" class="text-center"></h4>
+				</div>
+				<div class="chat-body"></div>
+				<div class="chat-footer">
+					<div class="input-group">
+						<input type="text" class="form-control"
+							placeholder="Type a message" id="sendInput" disabled>
+						<div class="input-group-append">
+							<button class="btn btn-primary" id="sendBut" disabled>Send</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="createGroupModal" tabindex="-1"
+		aria-labelledby="createGroupModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content bg-dark text-white">
+				<div class="modal-header">
+					<h5 class="modal-title" id="createGroupModalLabel"></h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label for="groupNameInput">Group Name</label> <input type="text"
+							class="form-control" id="groupNameInput"
+							placeholder="Enter group name" required>
+					</div>
+					<div class="form-group">
+						<label for="groupUsers">Users to add</label>
+						<div id="selectedUsers" class="mb-2"></div>
+						<input id="searchUsersInModal" type="text"
+							class="form-control search-input" placeholder="Search users">
+						<div class="groupUsers-search-dropdown list-group"></div>
+					</div>
+					<div class="form-group">
+						<label for="groupDescriptionInput">Group Description</label>
+						<textarea class="form-control" id="groupDescriptionInput" rows="3"
+							placeholder="Enter group description"></textarea>
+					</div>
+				</div>
+				<div class="modal-footer" id="chatFooter">
+					<button type="button" class="btn btn-primary d-none"
+						id="deleteChatBut">Delete chat</button>
+					<button type="button" class="btn btn-primary"
+						id="createGroupButton">Create Group</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="profileModal" tabindex="-1"
+		aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content bg-dark text-white">
+				<div class="modal-header text-center">
+					<h5 id="modalTitle" class="modal-title ">Profile</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+						<div class="form-group">
+							<label for="profileUsername">Username:</label> <input type="text"
+								class="form-control" name="username" id="profileUsername">
+						</div>
+						<div class="form-group">
+							<label for="profileDesc">Description:</label>
+							<textarea class="form-control" id="profileDesc" name="description"
+								rows="3"></textarea>
+						</div>
+				</div>
+				<div class="modal-footer" id="profileModalFooter"></div>
+			</div>
+		</div>
+	</div>
+	<script src="/js/home.js"></script>
+	<script src="/js/error.js"></script>
+</body>
+</html>

@@ -18,12 +18,10 @@ import lombok.ToString;
 @ToString
 public class ChatWriteDTO {
 	
-	@Nullable
 	private String chatName;
 	
 	private List<String> usersName;
 	
-	@Nullable
 	private String description;
 	
 }
