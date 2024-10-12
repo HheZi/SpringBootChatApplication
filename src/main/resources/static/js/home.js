@@ -37,6 +37,8 @@ function onChatReceived(resp){
 		$("#sendInput, #sendBut").prop("disabled", true)
 		subscriptions.get(chat).unsubscribe();
 		subscriptions.delete(chat);
+		currentChatId = null;
+		currentChatUrl = null;
 		return;
 	}
 	const tag = $("#"+chat.chatId + " .group-details");

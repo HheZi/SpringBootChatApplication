@@ -4,7 +4,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Profile;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 
 import com.chat_app.model.User;
@@ -14,15 +19,15 @@ import com.chat_app.service.mapper.UserMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-@SpringBootTest
-@Slf4j
+@Profile("test")
+@DataJpaTest(showSql = true)
 @Sql(scripts = "classpath:sql/init_db.sql")
 class UserServiceTest {
 
-	@Mock
+	@MockBean
 	private UserService userService;
 	
-	@Mock
+	@MockBean
 	private UserMapper userMapper;
 	
 	@Test
@@ -30,10 +35,10 @@ class UserServiceTest {
 		UserReadDTO expected = new UserReadDTO("email.com", "HheZi", null);
 		
 		UserWriteDTO dto = new UserWriteDTO("email.com", "HheZi", "12345");
-		User savedUser = userService.saveUser(dto);
+		userService.saveUser(dto);
 		
-		log.warn("User is {} ", savedUser);
 		
-		assertEquals(expected, userMapper.userToReadDTO(savedUser));
+		
+		assertEquals(expected, userService.getUserByUsername(expected.getUsername()));
 	}
 }
